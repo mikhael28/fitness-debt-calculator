@@ -97,34 +97,52 @@
       .debt-display {
         background: #f7fafc;
         border: 2px solid #2d3748;
-        padding: 25px;
+        padding: 20px;
         margin-bottom: 20px;
         text-align: center;
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         position: relative;
       }
 
-      .debt-display::before {
-        content: "OUTSTANDING BALANCE";
-        position: absolute;
-        top: 8px;
-        left: 50%;
-        transform: translateX(-50%);
+      .balance-row {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 10px;
+      }
+
+      .balance-item {
+        flex: 1;
+        max-width: 250px;
+      }
+
+      .balance-label {
         font-size: 9px;
         letter-spacing: 2px;
+        text-transform: uppercase;
         color: #718096;
+        margin-bottom: 8px;
       }
 
       .debt-amount {
-        font-size: 56px;
+        font-size: 48px;
         font-weight: bold;
-        color: #2d3748;
+        color: #c53030;
         font-family: "Courier New", monospace;
         letter-spacing: 2px;
         margin: 5px 0;
       }
 
-      .debt-label {
+      .credit-amount {
+        font-size: 48px;
+        font-weight: bold;
+        color: #2f855a;
+        font-family: "Courier New", monospace;
+        letter-spacing: 2px;
+        margin: 5px 0;
+      }
+
+      .balance-unit {
         font-size: 11px;
         letter-spacing: 2px;
         text-transform: uppercase;
@@ -476,20 +494,87 @@
         text-transform: uppercase;
         letter-spacing: 1px;
       }
+
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        pointer-events: none;
+      }
+
+      .toast {
+        background: #2f855a;
+        color: white;
+        padding: 12px 20px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        font-size: 13px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        animation: slideIn 0.3s ease-out, slideOut 0.3s ease-in 2.7s;
+        pointer-events: auto;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+      }
+
+      .quick-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #cbd5e0;
+        border-color: #a0aec0;
+        color: #718096;
+      }
+
+      .quick-btn:disabled:hover {
+        background: #cbd5e0;
+        color: #718096;
+        transform: scale(1);
+      }
     </style>
   </head>
   <body>
+    <div class="toast-container" id="toastContainer"></div>
+
     <div class="header-seal">
       <div class="department-title">Department of Physical Treasury</div>
-      <div class="ledger-title">FITNESS DEBT LEDGER</div>
-      <div class="ledger-subtitle">
-        Official Financial Accountability Record
-      </div>
+      <div class="ledger-title">DEBT LEDGER</div>
     </div>
 
     <div class="debt-display">
-      <div class="debt-amount" id="debtAmount">0</div>
-      <div class="debt-label">Renminbi (RMB)</div>
+      <div class="balance-row">
+        <div class="balance-item">
+          <div class="balance-label">Outstanding Debt</div>
+          <div class="debt-amount" id="debtAmount">0</div>
+          <div class="balance-unit">RMB</div>
+        </div>
+        <div class="balance-item">
+          <div class="balance-label">Daily Credit</div>
+          <div class="credit-amount" id="creditAmount">0</div>
+          <div class="balance-unit">RMB (Resets Nightly)</div>
+        </div>
+      </div>
     </div>
 
     <div class="tabs">
@@ -504,25 +589,21 @@
 
     <div id="exerciseTab" class="tab-content active">
       <div class="container">
-        <h2>Record Exercise</h2>
-
         <div>
-          <div class="quick-add-title">Quick Add</div>
-
           <div class="exercise-quick-item">
             <div class="exercise-name">Push-ups</div>
             <div class="quick-buttons">
               <button
                 type="button"
                 class="quick-btn"
-                onclick="quickAdd('pushups', 10)"
+                onclick="quickAdd(this, 'pushups', 10)"
               >
                 10
               </button>
               <button
                 type="button"
                 class="quick-btn"
-                onclick="quickAdd('pushups', 20)"
+                onclick="quickAdd(this, 'pushups', 20)"
               >
                 20
               </button>
@@ -535,14 +616,14 @@
               <button
                 type="button"
                 class="quick-btn"
-                onclick="quickAdd('situps', 10)"
+                onclick="quickAdd(this, 'situps', 10)"
               >
                 10
               </button>
               <button
                 type="button"
                 class="quick-btn"
-                onclick="quickAdd('situps', 20)"
+                onclick="quickAdd(this, 'situps', 20)"
               >
                 20
               </button>
@@ -555,14 +636,14 @@
               <button
                 type="button"
                 class="quick-btn"
-                onclick="quickAdd('curls', 10)"
+                onclick="quickAdd(this, 'curls', 10)"
               >
                 10
               </button>
               <button
                 type="button"
                 class="quick-btn"
-                onclick="quickAdd('curls', 20)"
+                onclick="quickAdd(this, 'curls', 20)"
               >
                 20
               </button>
@@ -575,14 +656,14 @@
               <button
                 type="button"
                 class="quick-btn"
-                onclick="quickAdd('bench', 10)"
+                onclick="quickAdd(this, 'bench', 10)"
               >
                 10
               </button>
               <button
                 type="button"
                 class="quick-btn"
-                onclick="quickAdd('bench', 20)"
+                onclick="quickAdd(this, 'bench', 20)"
               >
                 20
               </button>
@@ -595,14 +676,14 @@
               <button
                 type="button"
                 class="quick-btn"
-                onclick="quickAdd('plank', 1)"
+                onclick="quickAdd(this, 'plank', 1)"
               >
                 1m
               </button>
               <button
                 type="button"
                 class="quick-btn"
-                onclick="quickAdd('plank', 2)"
+                onclick="quickAdd(this, 'plank', 2)"
               >
                 2m
               </button>
@@ -641,8 +722,9 @@
       <div class="container">
         <h2>Add Purchase</h2>
         <div class="info-box">
-          NOTICE: Purchases cost 7 RMB per USD. Credit purchases (when in debt)
-          incur double cost penalty.
+          NOTICE: Purchases cost 7 RMB per USD. Daily credit (if available) is
+          used first with no penalty. Credit purchases (when in debt) incur
+          double cost penalty. Credit resets to zero every night.
         </div>
         <form id="purchaseForm">
           <div class="form-group">
@@ -799,6 +881,8 @@
             <div>2x overnight</div>
             <div><strong>Credit Penalty:</strong></div>
             <div>2x purchase cost</div>
+            <div><strong>Credit Rollover:</strong></div>
+            <div>None (resets nightly)</div>
           </div>
         </div>
         <button class="btn-secondary" onclick="resetApp()">
@@ -811,6 +895,7 @@
       // State management
       let state = {
         debt: 0,
+        credit: 0,
         lastCheckDate: null,
         transactions: [],
         exerciseValues: {
@@ -899,13 +984,15 @@
             // Strip surrounding quotes if present (API returns "value" instead of value)
             const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
             const parts = cleanData.split("|");
-            if (parts.length === 2) {
+            if (parts.length === 3) {
               const debt = parseFloat(parts[0]);
-              const lastCheckDate = parts[1];
+              const credit = parseFloat(parts[1]);
+              const lastCheckDate = parts[2];
 
-              if (!isNaN(debt) && lastCheckDate) {
+              if (!isNaN(debt) && !isNaN(credit) && lastCheckDate) {
                 // Found existing data! Load it
                 state.debt = debt;
+                state.credit = credit;
                 state.lastCheckDate = lastCheckDate;
                 state.lastSyncTime = new Date().toISOString();
                 saveState();
@@ -916,6 +1003,34 @@
                   'Cloud sync activated!\n\nKey: "' +
                     appKey +
                     '"\n\nFound existing data in cloud:\nDebt: ' +
+                    debt.toFixed(0) +
+                    " RMB\nCredit: " +
+                    credit.toFixed(0) +
+                    " RMB\nLast rollover: " +
+                    lastCheckDate +
+                    "\n\nYour debt will now auto-sync after each transaction."
+                );
+                return;
+              }
+            } else if (parts.length === 2) {
+              // Legacy format (debt|lastCheckDate)
+              const debt = parseFloat(parts[0]);
+              const lastCheckDate = parts[1];
+
+              if (!isNaN(debt) && lastCheckDate) {
+                // Found existing data! Load it
+                state.debt = debt;
+                state.credit = 0;
+                state.lastCheckDate = lastCheckDate;
+                state.lastSyncTime = new Date().toISOString();
+                saveState();
+                updateDisplay();
+                updateSyncStatus();
+
+                alert(
+                  'Cloud sync activated!\n\nKey: "' +
+                    appKey +
+                    '"\n\nFound existing data in cloud (legacy format):\nDebt: ' +
                     debt.toFixed(0) +
                     " RMB\nLast rollover: " +
                     lastCheckDate +
@@ -956,9 +1071,10 @@
         }
 
         try {
-          // Create sync value: debt|lastCheckDate (pipe-delimited for simplicity)
+          // Create sync value: debt|credit|lastCheckDate (pipe-delimited for simplicity)
           const debtValue = Math.round(state.debt);
-          const syncValue = `${debtValue}|${state.lastCheckDate}`;
+          const creditValue = Math.round(state.credit);
+          const syncValue = `${debtValue}|${creditValue}|${state.lastCheckDate}`;
 
           console.log("Syncing to cloud:", syncValue);
 
@@ -998,14 +1114,31 @@
           if (cloudData && cloudData !== "null" && cloudData !== "") {
             // Strip surrounding quotes if present (API returns "value" instead of value)
             const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
-            // Parse pipe-delimited format: debt|lastCheckDate
+            // Parse pipe-delimited format: debt|credit|lastCheckDate or debt|lastCheckDate (legacy)
             const parts = cleanData.split("|");
-            if (parts.length === 2) {
+            if (parts.length === 3) {
+              const debt = parseFloat(parts[0]);
+              const credit = parseFloat(parts[1]);
+              const lastCheckDate = parts[2];
+
+              if (!isNaN(debt) && !isNaN(credit) && lastCheckDate) {
+                state.debt = debt;
+                state.credit = credit;
+                state.lastCheckDate = lastCheckDate;
+                state.lastSyncTime = new Date().toISOString();
+                saveState();
+                updateDisplay();
+                updateSyncStatus();
+                return true;
+              }
+            } else if (parts.length === 2) {
+              // Legacy format (debt|lastCheckDate)
               const debt = parseFloat(parts[0]);
               const lastCheckDate = parts[1];
 
               if (!isNaN(debt) && lastCheckDate) {
                 state.debt = debt;
+                state.credit = 0;
                 state.lastCheckDate = lastCheckDate;
                 state.lastSyncTime = new Date().toISOString();
                 saveState();
@@ -1042,15 +1175,18 @@
           if (cloudData && cloudData !== "null" && cloudData !== "") {
             // Strip surrounding quotes if present (API returns "value" instead of value)
             const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
-            // Parse pipe-delimited format: debt|lastCheckDate
+            // Parse pipe-delimited format: debt|credit|lastCheckDate or debt|lastCheckDate (legacy)
             const parts = cleanData.split("|");
-            if (parts.length === 2) {
+            if (parts.length === 3) {
               const debt = parseFloat(parts[0]);
-              const lastCheckDate = parts[1];
+              const credit = parseFloat(parts[1]);
+              const lastCheckDate = parts[2];
 
-              if (!isNaN(debt) && lastCheckDate) {
+              if (!isNaN(debt) && !isNaN(credit) && lastCheckDate) {
                 const oldDebt = state.debt;
+                const oldCredit = state.credit;
                 state.debt = debt;
+                state.credit = credit;
                 state.lastCheckDate = lastCheckDate;
 
                 // Save the app key if it wasn't already saved
@@ -1067,9 +1203,46 @@
                 document.getElementById("appKeyInput").value = appKey;
 
                 alert(
-                  "Success!\n\nLoaded from cloud:\nCloud value: " +
-                    cloudData +
-                    "\nOld debt: " +
+                  "Success!\n\nLoaded from cloud:\nOld debt: " +
+                    oldDebt.toFixed(0) +
+                    " RMB\nNew debt: " +
+                    debt.toFixed(0) +
+                    " RMB\nOld credit: " +
+                    oldCredit.toFixed(0) +
+                    " RMB\nNew credit: " +
+                    credit.toFixed(0) +
+                    " RMB\nLast rollover: " +
+                    lastCheckDate
+                );
+              } else {
+                alert("Invalid data format in cloud.");
+              }
+            } else if (parts.length === 2) {
+              // Legacy format (debt|lastCheckDate)
+              const debt = parseFloat(parts[0]);
+              const lastCheckDate = parts[1];
+
+              if (!isNaN(debt) && lastCheckDate) {
+                const oldDebt = state.debt;
+                state.debt = debt;
+                state.credit = 0;
+                state.lastCheckDate = lastCheckDate;
+
+                // Save the app key if it wasn't already saved
+                if (!state.appKey) {
+                  state.appKey = appKey;
+                }
+
+                state.lastSyncTime = new Date().toISOString();
+                saveState();
+                updateDisplay();
+                updateSyncStatus();
+
+                // Update the input field
+                document.getElementById("appKeyInput").value = appKey;
+
+                alert(
+                  "Success!\n\nLoaded from cloud (legacy format):\nOld debt: " +
                     oldDebt.toFixed(0) +
                     " RMB\nNew debt: " +
                     debt.toFixed(0) +
@@ -1189,12 +1362,19 @@
         newDebt *= 2;
 
         const oldDebt = state.debt;
+        const oldCredit = state.credit;
         state.debt = newDebt;
+        state.credit = 0; // Reset credit every night
 
         // Add system transaction
+        let description = `Day end: +${MGMT_FEE} mgmt fee, then doubled`;
+        if (oldCredit > 0) {
+          description += `, ${oldCredit.toFixed(0)} RMB credit forfeited`;
+        }
+
         state.transactions.unshift({
           type: "system",
-          description: `Day end: +${MGMT_FEE} mgmt fee, then doubled`,
+          description: description,
           amount: newDebt - oldDebt,
           time: "Midnight",
           date: state.lastCheckDate,
@@ -1212,23 +1392,64 @@
             document.getElementById("purchaseAmount").value
           );
 
-          let rmb = usd * USD_TO_RMB;
+          let baseCost = usd * USD_TO_RMB;
+          let totalCost = baseCost;
+          let usedCredit = 0;
+          let addedDebt = 0;
+          let doubled = false;
 
-          // Double cost if in debt
-          if (state.debt > 0) {
-            rmb *= 2;
+          // First, try to use credit (no penalty)
+          if (state.credit >= baseCost) {
+            // Full purchase covered by credit
+            state.credit -= baseCost;
+            usedCredit = baseCost;
+          } else if (state.credit > 0) {
+            // Partial credit available
+            usedCredit = state.credit;
+            state.credit = 0;
+            let remaining = baseCost - usedCredit;
+
+            // If already in debt, double the remaining cost
+            if (state.debt > 0) {
+              remaining *= 2;
+              doubled = true;
+            }
+
+            state.debt += remaining;
+            addedDebt = remaining;
+            totalCost = usedCredit + addedDebt;
+          } else {
+            // No credit, use debt
+            if (state.debt > 0) {
+              // Already in debt, double the cost
+              totalCost = baseCost * 2;
+              doubled = true;
+            }
+            state.debt += totalCost;
+            addedDebt = totalCost;
           }
 
-          state.debt += rmb;
+          let transactionDesc = desc;
+          if (usedCredit > 0 && addedDebt > 0) {
+            transactionDesc += ` (${usedCredit.toFixed(
+              0
+            )} RMB from credit, ${addedDebt.toFixed(0)} RMB to debt)`;
+          } else if (usedCredit > 0) {
+            transactionDesc += " (paid with credit)";
+          }
+
+          if (doubled) {
+            transactionDesc += " [CREDIT PENALTY APPLIED]";
+          }
 
           state.transactions.unshift({
             type: "debt",
-            description: desc,
-            amount: rmb,
+            description: transactionDesc,
+            amount: totalCost,
             usd: usd,
             time: getTimeString(),
             date: getDateString(),
-            doubled: state.debt > rmb,
+            doubled: doubled,
           });
 
           saveState();
@@ -1256,26 +1477,78 @@
           this.reset();
         });
 
+      // Toast notification function
+      function showToast(message) {
+        const container = document.getElementById("toastContainer");
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+          toast.remove();
+        }, 3000);
+      }
+
       // Quick add function
-      function quickAdd(type, amount) {
+      function quickAdd(button, type, amount) {
+        // Disable the button
+        button.disabled = true;
+
+        // Store original styles
+        const originalBg = button.style.background;
+        const originalColor = button.style.color;
+        const originalBorderColor = button.style.borderColor;
+
+        // Record the exercise
         recordExercise(type, amount);
+
+        // Show toast notification
+        const unit = type === "plank" ? "min" : "reps";
+        showToast(`✓ Recorded ${amount} ${unit} of ${typeNames[type]}`);
+
+        // Re-enable button after 3 seconds and reset styles
+        setTimeout(() => {
+          button.disabled = false;
+          button.style.background = originalBg;
+          button.style.color = originalColor;
+          button.style.borderColor = originalBorderColor;
+        }, 3000);
       }
 
       // Shared exercise recording function
       function recordExercise(type, amount) {
         const value = state.exerciseValues[type];
         const rmb = amount * value;
-
-        // Can't reduce debt below 0
-        const payment = Math.min(rmb, state.debt);
-        state.debt -= payment;
-
         const unit = type === "plank" ? "min" : "reps";
+
+        let description = `${typeNames[type]} (${amount} ${unit})`;
+
+        if (state.debt > 0) {
+          // Pay off debt first
+          const payment = Math.min(rmb, state.debt);
+          state.debt -= payment;
+
+          const surplus = rmb - payment;
+          if (surplus > 0) {
+            // Add surplus to credit
+            state.credit += surplus;
+            description += ` (-${payment.toFixed(
+              0
+            )} RMB debt, +${surplus.toFixed(0)} RMB credit)`;
+          } else {
+            description += ` (-${payment.toFixed(0)} RMB debt)`;
+          }
+        } else {
+          // No debt, add to credit
+          state.credit += rmb;
+          description += ` (+${rmb.toFixed(0)} RMB credit)`;
+        }
 
         state.transactions.unshift({
           type: "payment",
-          description: `${typeNames[type]} (${amount} ${unit})`,
-          amount: payment,
+          description: description,
+          amount: rmb,
           time: getTimeString(),
           date: getDateString(),
         });
@@ -1289,6 +1562,8 @@
       function updateDisplay() {
         document.getElementById("debtAmount").textContent =
           state.debt.toFixed(0);
+        document.getElementById("creditAmount").textContent =
+          state.credit.toFixed(0);
         updateTransactionList();
       }
 
