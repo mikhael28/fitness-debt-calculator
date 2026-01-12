@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fitness Debt Ledger</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Georgia", "Times New Roman", serif;
+        background: #e8e4d9;
+        background-image: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.02) 2px,
+          rgba(0, 0, 0, 0.02) 4px
+        );
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+        color: #1a1a1a;
+      }
+
+      .header-seal {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: linear-gradient(to bottom, #1a365d 0%, #2c5282 100%);
+        border: 3px solid #b8860b;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+      }
+
+      .header-seal::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          to right,
+          transparent,
+          #b8860b,
+          transparent
+        );
+      }
+
+      .header-seal::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          to right,
+          transparent,
+          #b8860b,
+          transparent
+        );
+      }
+
+      .department-title {
+        font-size: 11px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #b8860b;
+        margin-bottom: 8px;
+        font-weight: normal;
+      }
+
+      .ledger-title {
+        font-size: 28px;
+        font-weight: bold;
+        color: #f7f7f7;
+        letter-spacing: 1px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        margin-bottom: 8px;
+      }
+
+      .ledger-subtitle {
+        font-size: 10px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #cbd5e0;
+        font-weight: normal;
+      }
+
+      .debt-display {
+        background: #f7fafc;
+        border: 2px solid #2d3748;
+        padding: 25px;
+        margin-bottom: 20px;
+        text-align: center;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      .debt-display::before {
+        content: "OUTSTANDING BALANCE";
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 9px;
+        letter-spacing: 2px;
+        color: #718096;
+      }
+
+      .debt-amount {
+        font-size: 56px;
+        font-weight: bold;
+        color: #2d3748;
+        font-family: "Courier New", monospace;
+        letter-spacing: 2px;
+        margin: 5px 0;
+      }
+
+      .debt-label {
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #4a5568;
+      }
+
+      .container {
+        background: #fefefe;
+        border: 2px solid #2d3748;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        position: relative;
+      }
+
+      .container::before {
+        content: "";
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        border: 1px solid #cbd5e0;
+        pointer-events: none;
+      }
+
+      h2 {
+        color: #1a365d;
+        margin-bottom: 15px;
+        font-size: 16px;
+        border-bottom: 2px solid #2d3748;
+        padding-bottom: 8px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #2d3748;
+        font-weight: bold;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #4a5568;
+        background: #f7fafc;
+        font-size: 14px;
+        font-family: "Courier New", monospace;
+        color: #1a1a1a;
+      }
+
+      input[type="number"] {
+        appearance: textfield;
+        -moz-appearance: textfield;
+      }
+
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #1a365d;
+        background: #fff;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #2d3748;
+        font-size: 13px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-family: Georgia, serif;
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+      }
+
+      button:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-primary {
+        background: #2c5282;
+        color: #f7f7f7;
+      }
+
+      .btn-primary:hover {
+        background: #1a365d;
+      }
+
+      .btn-success {
+        background: #2f855a;
+        color: #f7f7f7;
+      }
+
+      .btn-success:hover {
+        background: #276749;
+      }
+
+      .btn-secondary {
+        background: #4a5568;
+        color: #f7f7f7;
+        margin-top: 10px;
+      }
+
+      .btn-secondary:hover {
+        background: #2d3748;
+      }
+
+      .transaction-list {
+        max-height: 350px;
+        overflow-y: auto;
+        border: 1px solid #cbd5e0;
+        padding: 10px;
+        background: #f7fafc;
+      }
+
+      .transaction-item {
+        padding: 12px;
+        border-left: 4px solid #cbd5e0;
+        margin-bottom: 10px;
+        background: #fff;
+        font-size: 13px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+
+      .transaction-item.debt {
+        border-left-color: #c53030;
+        background: #fff5f5;
+      }
+
+      .transaction-item.payment {
+        border-left-color: #2f855a;
+        background: #f0fff4;
+      }
+
+      .transaction-item.system {
+        border-left-color: #dd6b20;
+        background: #fffaf0;
+      }
+
+      .transaction-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+
+      .transaction-amount {
+        font-weight: bold;
+        font-size: 16px;
+        font-family: "Courier New", monospace;
+      }
+
+      .transaction-amount.negative {
+        color: #c53030;
+      }
+
+      .transaction-amount.positive {
+        color: #2f855a;
+      }
+
+      .transaction-description {
+        color: #4a5568;
+        font-size: 12px;
+      }
+
+      .transaction-time {
+        color: #718096;
+        font-size: 11px;
+        font-family: "Courier New", monospace;
+      }
+
+      .exercise-config {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .exercise-config label {
+        margin: 0;
+      }
+
+      .exercise-config input {
+        padding: 8px;
+      }
+
+      .info-box {
+        background: #fffaf0;
+        border: 2px solid #dd6b20;
+        padding: 12px;
+        margin-bottom: 15px;
+        font-size: 12px;
+        color: #744210;
+        letter-spacing: 0.3px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 20px;
+        border: 2px solid #2d3748;
+        background: #2d3748;
+      }
+
+      .tab {
+        flex: 1;
+        padding: 14px 10px;
+        background: #4a5568;
+        border: none;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: bold;
+        color: #cbd5e0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-right: 1px solid #2d3748;
+        font-family: Georgia, serif;
+        transition: all 0.2s;
+      }
+
+      .tab:last-child {
+        border-right: none;
+      }
+
+      .tab.active {
+        background: #1a365d;
+        color: #b8860b;
+      }
+
+      .tab:hover:not(.active) {
+        background: #2d3748;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .quick-add-section {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 2px dashed #cbd5e0;
+      }
+
+      .quick-add-title {
+        font-size: 12px;
+        font-weight: bold;
+        color: #2d3748;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .exercise-quick-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        margin-bottom: 10px;
+        background: #f7fafc;
+        border: 1px solid #cbd5e0;
+      }
+
+      .exercise-name {
+        font-size: 13px;
+        font-weight: bold;
+        color: #2d3748;
+        flex: 1;
+      }
+
+      .quick-buttons {
+        display: flex;
+        gap: 8px;
+      }
+
+      .quick-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid #2f855a;
+        background: #f0fff4;
+        color: #2f855a;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Courier New", monospace;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 0;
+      }
+
+      .quick-btn:hover {
+        background: #2f855a;
+        color: white;
+        transform: scale(1.05);
+      }
+
+      .quick-btn:active {
+        transform: scale(0.95);
+      }
+
+      .stamp {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(197, 48, 48, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(-15deg);
+        pointer-events: none;
+      }
+
+      .stamp-text {
+        font-size: 9px;
+        font-weight: bold;
+        color: rgba(197, 48, 48, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header-seal">
+      <div class="department-title">Department of Physical Treasury</div>
+      <div class="ledger-title">FITNESS DEBT LEDGER</div>
+      <div class="ledger-subtitle">
+        Official Financial Accountability Record
+      </div>
+    </div>
+
+    <div class="debt-display">
+      <div class="debt-amount" id="debtAmount">0</div>
+      <div class="debt-label">Renminbi (RMB)</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('exercise')">
+        Exercise
+      </button>
+      <button class="tab" onclick="switchTab('transactions')">
+        Transactions
+      </button>
+      <button class="tab" onclick="switchTab('settings')">Settings</button>
+    </div>
+
+    <div id="exerciseTab" class="tab-content active">
+      <div class="container">
+        <h2>Record Exercise</h2>
+
+        <div>
+          <div class="quick-add-title">Quick Add</div>
+
+          <div class="exercise-quick-item">
+            <div class="exercise-name">Push-ups</div>
+            <div class="quick-buttons">
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd('pushups', 10)"
+              >
+                10
+              </button>
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd('pushups', 20)"
+              >
+                20
+              </button>
+            </div>
+          </div>
+
+          <div class="exercise-quick-item">
+            <div class="exercise-name">Sit-ups</div>
+            <div class="quick-buttons">
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd('situps', 10)"
+              >
+                10
+              </button>
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd('situps', 20)"
+              >
+                20
+              </button>
+            </div>
+          </div>
+
+          <div class="exercise-quick-item">
+            <div class="exercise-name">Curls</div>
+            <div class="quick-buttons">
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd('curls', 10)"
+              >
+                10
+              </button>
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd('curls', 20)"
+              >
+                20
+              </button>
+            </div>
+          </div>
+
+          <div class="exercise-quick-item">
+            <div class="exercise-name">Bench Press</div>
+            <div class="quick-buttons">
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd('bench', 10)"
+              >
+                10
+              </button>
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd('bench', 20)"
+              >
+                20
+              </button>
+            </div>
+          </div>
+
+          <div class="exercise-quick-item">
+            <div class="exercise-name">Plank</div>
+            <div class="quick-buttons">
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd('plank', 1)"
+              >
+                1m
+              </button>
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd('plank', 2)"
+              >
+                2m
+              </button>
+            </div>
+          </div>
+        </div>
+        <form id="exerciseForm" class="quick-add-section">
+          <div class="form-group">
+            <label for="exerciseType">Exercise Type</label>
+            <select id="exerciseType" required>
+              <option value="">Select exercise...</option>
+              <option value="pushups">Push-ups</option>
+              <option value="situps">Sit-ups</option>
+              <option value="curls">Curls</option>
+              <option value="bench">Bench Press</option>
+              <option value="plank">Plank (minutes)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="exerciseAmount">Amount</label>
+            <input
+              type="number"
+              id="exerciseAmount"
+              step="0.1"
+              min="0"
+              placeholder="0"
+              required
+            />
+          </div>
+          <button type="submit" class="btn-success">Record Exercise</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="transactionsTab" class="tab-content">
+      <div class="container">
+        <h2>Add Purchase</h2>
+        <div class="info-box">
+          NOTICE: Purchases cost 7 RMB per USD. Credit purchases (when in debt)
+          incur double cost penalty.
+        </div>
+        <form id="purchaseForm">
+          <div class="form-group">
+            <label for="purchaseDesc">Description</label>
+            <input
+              type="text"
+              id="purchaseDesc"
+              placeholder="e.g., Beer, Pizza"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="purchaseAmount">Amount (USD)</label>
+            <input
+              type="number"
+              id="purchaseAmount"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              required
+            />
+          </div>
+          <button type="submit" class="btn-primary">Add Purchase</button>
+        </form>
+      </div>
+
+      <div class="container">
+        <h2>Transaction History</h2>
+        <div class="transaction-list" id="transactionList">
+          <p style="text-align: center; color: #718096; font-size: 12px">
+            No transactions recorded
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="settingsTab" class="tab-content">
+      <div class="container">
+        <h2>Exercise Values</h2>
+        <p style="margin-bottom: 15px; color: #4a5568; font-size: 12px">
+          Configure RMB value per exercise unit
+        </p>
+
+        <div class="exercise-config">
+          <label>Push-ups (per rep)</label>
+          <input type="number" id="valuePushups" value="1" min="0" step="0.1" />
+        </div>
+
+        <div class="exercise-config">
+          <label>Sit-ups (per rep)</label>
+          <input type="number" id="valueSitups" value="1" min="0" step="0.1" />
+        </div>
+
+        <div class="exercise-config">
+          <label>Curls (per rep)</label>
+          <input type="number" id="valueCurls" value="1" min="0" step="0.1" />
+        </div>
+
+        <div class="exercise-config">
+          <label>Bench Press (per rep)</label>
+          <input type="number" id="valueBench" value="1" min="0" step="0.1" />
+        </div>
+
+        <div class="exercise-config">
+          <label>Plank (per minute)</label>
+          <input type="number" id="valuePlank" value="30" min="0" step="0.1" />
+        </div>
+
+        <button class="btn-secondary" onclick="saveExerciseValues()">
+          Save Values
+        </button>
+      </div>
+
+      <div class="container">
+        <h2>Cloud Sync</h2>
+
+        <div class="info-box">
+          <strong>How it works:</strong><br />
+          • Choose a unique key (like "misha" or "john123")<br />
+          • Your debt auto-saves to cloud after each transaction<br />
+          • Use same key on other devices to sync your data
+        </div>
+
+        <div class="form-group">
+          <label for="appKeyInput">Your Cloud Key</label>
+          <input
+            type="text"
+            id="appKeyInput"
+            placeholder="e.g., misha"
+            maxlength="20"
+          />
+        </div>
+
+        <button
+          class="btn-success"
+          onclick="saveAndSyncAppKey()"
+          style="margin-bottom: 10px"
+        >
+          Start Using This Key
+        </button>
+
+        <div
+          style="
+            font-size: 11px;
+            color: #718096;
+            text-align: center;
+            margin-bottom: 15px;
+          "
+        >
+          Status: <span id="syncStatus">Not configured</span>
+        </div>
+
+        <div style="border-top: 1px dashed #cbd5e0; padding-top: 15px">
+          <div
+            style="
+              font-size: 11px;
+              color: #2d3748;
+              font-weight: bold;
+              margin-bottom: 8px;
+              text-transform: uppercase;
+            "
+          >
+            Advanced
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+            <!-- <button class="btn-secondary" onclick="syncToCloud()" style="margin-top: 0; font-size: 11px; padding: 10px;">Manual Sync</button> -->
+            <button
+              class="btn-secondary"
+              onclick="loadFromCloud()"
+              style="margin-top: 0; font-size: 11px; padding: 10px"
+            >
+              Pull from Cloud
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <h2>System Parameters</h2>
+        <div style="font-size: 12px; line-height: 1.8; color: #2d3748">
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 10px;
+              margin-bottom: 15px;
+            "
+          >
+            <div><strong>Exchange Rate:</strong></div>
+            <div>1 USD = 7 RMB</div>
+            <div><strong>Management Fee:</strong></div>
+            <div>50 RMB daily</div>
+            <div><strong>Debt Penalty:</strong></div>
+            <div>2x overnight</div>
+            <div><strong>Credit Penalty:</strong></div>
+            <div>2x purchase cost</div>
+          </div>
+        </div>
+        <button class="btn-secondary" onclick="resetApp()">
+          Reset All Data
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // State management
+      let state = {
+        debt: 0,
+        lastCheckDate: null,
+        transactions: [],
+        exerciseValues: {
+          pushups: 1,
+          situps: 1,
+          curls: 1,
+          bench: 1,
+          plank: 30,
+        },
+        appKey: "",
+        lastSyncTime: null,
+      };
+
+      // Constants
+      const USD_TO_RMB = 7;
+      const MGMT_FEE = 50;
+
+      // Exercise type display names
+      const typeNames = {
+        pushups: "Push-ups",
+        situps: "Sit-ups",
+        curls: "Curls",
+        bench: "Bench Press",
+        plank: "Plank",
+      };
+
+      // Initialize app
+      async function init() {
+        loadState();
+        await checkDayRollover();
+        updateDisplay();
+        loadExerciseValues();
+        loadAppKey();
+        updateSyncStatus();
+      }
+
+      // LocalStorage functions
+      function loadState() {
+        const saved = localStorage.getItem("fitnessDebtState");
+        if (saved) {
+          state = JSON.parse(saved);
+        } else {
+          state.lastCheckDate = getDateString();
+          saveState();
+        }
+      }
+
+      function saveState() {
+        localStorage.setItem("fitnessDebtState", JSON.stringify(state));
+      }
+
+      // Cloud sync functions
+      async function saveAndSyncAppKey() {
+        const appKey = document.getElementById("appKeyInput").value.trim();
+
+        if (!appKey) {
+          alert(
+            'Please enter a cloud key first.\n\nExample: "misha" or "john123"'
+          );
+          return;
+        }
+
+        // Validate key (alphanumeric, no spaces)
+        if (!/^[a-zA-Z0-9]+$/.test(appKey)) {
+          alert(
+            "Cloud key must contain only letters and numbers (no spaces or special characters)."
+          );
+          return;
+        }
+
+        state.appKey = appKey;
+        saveState();
+        updateSyncStatus();
+
+        // First, try to PULL from cloud to see if this key already exists
+        try {
+          const response = await fetch(
+            `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${appKey}/fitnessdebt`
+          );
+          const cloudData = await response.text();
+
+          console.log("Checking if key exists in cloud:", cloudData);
+
+          // If data exists in cloud, load it first
+          if (cloudData && cloudData !== "null" && cloudData !== "") {
+            // Strip surrounding quotes if present (API returns "value" instead of value)
+            const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
+            const parts = cleanData.split("|");
+            if (parts.length === 2) {
+              const debt = parseFloat(parts[0]);
+              const lastCheckDate = parts[1];
+
+              if (!isNaN(debt) && lastCheckDate) {
+                // Found existing data! Load it
+                state.debt = debt;
+                state.lastCheckDate = lastCheckDate;
+                state.lastSyncTime = new Date().toISOString();
+                saveState();
+                updateDisplay();
+                updateSyncStatus();
+
+                alert(
+                  'Cloud sync activated!\n\nKey: "' +
+                    appKey +
+                    '"\n\nFound existing data in cloud:\nDebt: ' +
+                    debt.toFixed(0) +
+                    " RMB\nLast rollover: " +
+                    lastCheckDate +
+                    "\n\nYour debt will now auto-sync after each transaction."
+                );
+                return;
+              }
+            }
+          }
+
+          // No existing data found, sync current state to cloud
+          const synced = await syncToCloud();
+
+          if (synced) {
+            alert(
+              'Cloud sync activated!\n\nYour key: "' +
+                appKey +
+                '"\n\nThis is a new key. Your current debt (' +
+                state.debt.toFixed(0) +
+                " RMB) has been synced to cloud.\n\nYour debt will now auto-sync after each transaction."
+            );
+          } else {
+            alert(
+              "Cloud key saved, but sync failed. Check your internet connection."
+            );
+          }
+        } catch (error) {
+          console.error("Error checking cloud:", error);
+          alert(
+            "Error checking cloud. Key saved locally, but could not verify cloud data."
+          );
+        }
+      }
+
+      async function syncToCloud() {
+        if (!state.appKey) {
+          return false;
+        }
+
+        try {
+          // Create sync value: debt|lastCheckDate (pipe-delimited for simplicity)
+          const debtValue = Math.round(state.debt);
+          const syncValue = `${debtValue}|${state.lastCheckDate}`;
+
+          console.log("Syncing to cloud:", syncValue);
+
+          const response = await fetch(
+            `https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${state.appKey}/fitnessdebt/${syncValue}`,
+            { method: "POST" }
+          );
+
+          console.log("Sync response status:", response.status);
+
+          if (response.ok) {
+            state.lastSyncTime = new Date().toISOString();
+            saveState();
+            updateSyncStatus();
+            console.log("Sync successful:", syncValue);
+            return true;
+          } else {
+            console.error("Sync failed with status:", response.status);
+            return false;
+          }
+        } catch (error) {
+          console.error("Sync error:", error);
+          return false;
+        }
+      }
+
+      async function syncFromCloudSilent() {
+        // Silent sync from cloud (used during init to prevent duplicate rollovers)
+        if (!state.appKey) return false;
+
+        try {
+          const response = await fetch(
+            `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${state.appKey}/fitnessdebt`
+          );
+          const cloudData = await response.text();
+
+          if (cloudData && cloudData !== "null" && cloudData !== "") {
+            // Strip surrounding quotes if present (API returns "value" instead of value)
+            const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
+            // Parse pipe-delimited format: debt|lastCheckDate
+            const parts = cleanData.split("|");
+            if (parts.length === 2) {
+              const debt = parseFloat(parts[0]);
+              const lastCheckDate = parts[1];
+
+              if (!isNaN(debt) && lastCheckDate) {
+                state.debt = debt;
+                state.lastCheckDate = lastCheckDate;
+                state.lastSyncTime = new Date().toISOString();
+                saveState();
+                updateDisplay();
+                updateSyncStatus();
+                return true;
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Silent sync error:", error);
+        }
+        return false;
+      }
+
+      async function loadFromCloud() {
+        // Allow loading even if key isn't saved yet - use whatever is in the input field
+        const appKey =
+          state.appKey || document.getElementById("appKeyInput").value.trim();
+
+        if (!appKey) {
+          alert("Please enter your cloud key first.");
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${appKey}/fitnessdebt`
+          );
+          const cloudData = await response.text();
+
+          console.log("Loaded from cloud:", cloudData);
+
+          if (cloudData && cloudData !== "null" && cloudData !== "") {
+            // Strip surrounding quotes if present (API returns "value" instead of value)
+            const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
+            // Parse pipe-delimited format: debt|lastCheckDate
+            const parts = cleanData.split("|");
+            if (parts.length === 2) {
+              const debt = parseFloat(parts[0]);
+              const lastCheckDate = parts[1];
+
+              if (!isNaN(debt) && lastCheckDate) {
+                const oldDebt = state.debt;
+                state.debt = debt;
+                state.lastCheckDate = lastCheckDate;
+
+                // Save the app key if it wasn't already saved
+                if (!state.appKey) {
+                  state.appKey = appKey;
+                }
+
+                state.lastSyncTime = new Date().toISOString();
+                saveState();
+                updateDisplay();
+                updateSyncStatus();
+
+                // Update the input field
+                document.getElementById("appKeyInput").value = appKey;
+
+                alert(
+                  "Success!\n\nLoaded from cloud:\nCloud value: " +
+                    cloudData +
+                    "\nOld debt: " +
+                    oldDebt.toFixed(0) +
+                    " RMB\nNew debt: " +
+                    debt.toFixed(0) +
+                    " RMB\nLast rollover: " +
+                    lastCheckDate
+                );
+              } else {
+                alert("Invalid data format in cloud.");
+              }
+            } else {
+              alert("Invalid data format in cloud. Received: " + cloudData);
+            }
+          } else {
+            alert(
+              'No debt data found in cloud for key "' +
+                appKey +
+                '".\n\nThis might be a new key. Your next transaction will sync automatically.'
+            );
+          }
+        } catch (error) {
+          alert("Error loading from cloud: " + error.message);
+        }
+      }
+
+      function loadAppKey() {
+        if (state.appKey) {
+          document.getElementById("appKeyInput").value = state.appKey;
+        }
+      }
+
+      function updateSyncStatus() {
+        const statusEl = document.getElementById("syncStatus");
+        if (!statusEl) return;
+
+        if (!state.appKey) {
+          statusEl.textContent = "Not configured";
+          statusEl.style.color = "#718096";
+        } else if (state.lastSyncTime) {
+          const syncDate = new Date(state.lastSyncTime);
+          const now = new Date();
+          const diffMinutes = Math.floor((now - syncDate) / 1000 / 60);
+
+          if (diffMinutes < 1) {
+            statusEl.textContent = "Synced just now";
+            statusEl.style.color = "#2f855a";
+          } else if (diffMinutes < 60) {
+            statusEl.textContent = `Synced ${diffMinutes} min ago`;
+            statusEl.style.color = "#2f855a";
+          } else {
+            const hours = Math.floor(diffMinutes / 60);
+            statusEl.textContent = `Synced ${hours}h ago`;
+            statusEl.style.color = "#718096";
+          }
+        } else {
+          statusEl.textContent = "Never synced";
+          statusEl.style.color = "#c53030";
+        }
+      }
+
+      // Date utilities
+      function getDateString() {
+        const now = new Date();
+        return now.toISOString().split("T")[0];
+      }
+
+      function getTimeString() {
+        const now = new Date();
+        return now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      // Day rollover logic
+      async function checkDayRollover() {
+        const today = getDateString();
+        const lastDate = state.lastCheckDate;
+
+        // If we have an app key and a day has passed, check cloud first
+        if (state.appKey && lastDate && lastDate !== today) {
+          await syncFromCloudSilent();
+        }
+
+        // Re-check after potential cloud sync
+        const currentLastDate = state.lastCheckDate;
+        if (currentLastDate && currentLastDate !== today) {
+          // Calculate days passed
+          const last = new Date(currentLastDate);
+          const current = new Date(today);
+          const daysPassed = Math.floor(
+            (current - last) / (1000 * 60 * 60 * 24)
+          );
+
+          for (let i = 0; i < daysPassed; i++) {
+            applyDayEnd();
+          }
+
+          state.lastCheckDate = today;
+          saveState();
+
+          // Sync after day rollover
+          syncToCloud();
+        } else if (!currentLastDate || currentLastDate !== today) {
+          // First time setup or date mismatch
+          state.lastCheckDate = today;
+          saveState();
+        }
+      }
+
+      function applyDayEnd() {
+        let newDebt = state.debt;
+
+        // Apply management fee
+        newDebt += MGMT_FEE;
+
+        // Double the total debt
+        newDebt *= 2;
+
+        const oldDebt = state.debt;
+        state.debt = newDebt;
+
+        // Add system transaction
+        state.transactions.unshift({
+          type: "system",
+          description: `Day end: +${MGMT_FEE} mgmt fee, then doubled`,
+          amount: newDebt - oldDebt,
+          time: "Midnight",
+          date: state.lastCheckDate,
+        });
+      }
+
+      // Purchase form handler
+      document
+        .getElementById("purchaseForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const desc = document.getElementById("purchaseDesc").value;
+          const usd = parseFloat(
+            document.getElementById("purchaseAmount").value
+          );
+
+          let rmb = usd * USD_TO_RMB;
+
+          // Double cost if in debt
+          if (state.debt > 0) {
+            rmb *= 2;
+          }
+
+          state.debt += rmb;
+
+          state.transactions.unshift({
+            type: "debt",
+            description: desc,
+            amount: rmb,
+            usd: usd,
+            time: getTimeString(),
+            date: getDateString(),
+            doubled: state.debt > rmb,
+          });
+
+          saveState();
+          updateDisplay();
+          syncToCloud(); // Auto-sync to cloud
+
+          // Reset form
+          this.reset();
+        });
+
+      // Exercise form handler
+      document
+        .getElementById("exerciseForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const type = document.getElementById("exerciseType").value;
+          const amount = parseFloat(
+            document.getElementById("exerciseAmount").value
+          );
+
+          recordExercise(type, amount);
+
+          // Reset form
+          this.reset();
+        });
+
+      // Quick add function
+      function quickAdd(type, amount) {
+        recordExercise(type, amount);
+      }
+
+      // Shared exercise recording function
+      function recordExercise(type, amount) {
+        const value = state.exerciseValues[type];
+        const rmb = amount * value;
+
+        // Can't reduce debt below 0
+        const payment = Math.min(rmb, state.debt);
+        state.debt -= payment;
+
+        const unit = type === "plank" ? "min" : "reps";
+
+        state.transactions.unshift({
+          type: "payment",
+          description: `${typeNames[type]} (${amount} ${unit})`,
+          amount: payment,
+          time: getTimeString(),
+          date: getDateString(),
+        });
+
+        saveState();
+        updateDisplay();
+        syncToCloud(); // Auto-sync to cloud
+      }
+
+      // Display updates
+      function updateDisplay() {
+        document.getElementById("debtAmount").textContent =
+          state.debt.toFixed(0);
+        updateTransactionList();
+      }
+
+      function updateTransactionList() {
+        const list = document.getElementById("transactionList");
+
+        if (state.transactions.length === 0) {
+          list.innerHTML =
+            '<p style="text-align: center; color: #718096; font-size: 12px;">No transactions recorded</p>';
+          return;
+        }
+
+        list.innerHTML = state.transactions
+          .map((t) => {
+            const isNegative = t.type === "debt" || t.type === "system";
+            const sign = isNegative ? "+" : "-";
+            const amountClass = isNegative ? "negative" : "positive";
+
+            let desc = t.description;
+            if (t.type === "debt" && t.usd) {
+              desc += ` ($${t.usd.toFixed(2)} USD)`;
+              if (t.doubled) {
+                desc += " [CREDIT PENALTY APPLIED]";
+              }
+            }
+
+            return `
+                    <div class="transaction-item ${t.type}">
+                        <div class="transaction-header">
+                            <span class="transaction-amount ${amountClass}">${sign}${t.amount.toFixed(
+              0
+            )} RMB</span>
+                            <span class="transaction-time">${t.time}</span>
+                        </div>
+                        <div class="transaction-description">${desc}</div>
+                    </div>
+                `;
+          })
+          .join("");
+      }
+
+      // Exercise values
+      function loadExerciseValues() {
+        document.getElementById("valuePushups").value =
+          state.exerciseValues.pushups;
+        document.getElementById("valueSitups").value =
+          state.exerciseValues.situps;
+        document.getElementById("valueCurls").value =
+          state.exerciseValues.curls;
+        document.getElementById("valueBench").value =
+          state.exerciseValues.bench;
+        document.getElementById("valuePlank").value =
+          state.exerciseValues.plank;
+      }
+
+      function saveExerciseValues() {
+        state.exerciseValues.pushups = parseFloat(
+          document.getElementById("valuePushups").value
+        );
+        state.exerciseValues.situps = parseFloat(
+          document.getElementById("valueSitups").value
+        );
+        state.exerciseValues.curls = parseFloat(
+          document.getElementById("valueCurls").value
+        );
+        state.exerciseValues.bench = parseFloat(
+          document.getElementById("valueBench").value
+        );
+        state.exerciseValues.plank = parseFloat(
+          document.getElementById("valuePlank").value
+        );
+
+        saveState();
+        alert("Exercise values saved successfully.");
+      }
+
+      // Tab switching
+      function switchTab(tab) {
+        // Update tab buttons
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        event.target.classList.add("active");
+
+        // Update tab content
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => c.classList.remove("active"));
+
+        if (tab === "transactions") {
+          document.getElementById("transactionsTab").classList.add("active");
+        } else if (tab === "exercise") {
+          document.getElementById("exerciseTab").classList.add("active");
+        } else if (tab === "settings") {
+          document.getElementById("settingsTab").classList.add("active");
+        }
+      }
+
+      // Reset app
+      function resetApp() {
+        if (
+          confirm("WARNING: This will permanently delete all records. Proceed?")
+        ) {
+          localStorage.removeItem("fitnessDebtState");
+          location.reload();
+        }
+      }
+
+      // Initialize on load
+      init();
+    </script>
+  </body>
+</html>
