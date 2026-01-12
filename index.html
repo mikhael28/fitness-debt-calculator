@@ -552,10 +552,313 @@
         color: #718096;
         transform: scale(1);
       }
+
+      /* Modal overlay and container */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .modal-overlay.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background: #fefefe;
+        border: 3px solid #2d3748;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        animation: slideDown 0.3s ease-out;
+        position: relative;
+      }
+
+      .modal-header {
+        background: linear-gradient(to bottom, #c53030 0%, #9b2c2c 100%);
+        border-bottom: 3px solid #2d3748;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .modal-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #f7f7f7;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-subtitle {
+        font-size: 11px;
+        color: #fed7d7;
+        letter-spacing: 1px;
+        margin-top: 5px;
+      }
+
+      .modal-body {
+        padding: 25px;
+      }
+
+      .rollover-summary {
+        background: #f7fafc;
+        border: 2px solid #cbd5e0;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .rollover-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        font-size: 14px;
+        color: #2d3748;
+      }
+
+      .rollover-line.total {
+        border-top: 2px solid #2d3748;
+        margin-top: 10px;
+        padding-top: 15px;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .rollover-label {
+        flex: 1;
+      }
+
+      .rollover-value {
+        font-family: "Courier New", monospace;
+        font-weight: bold;
+        color: #c53030;
+      }
+
+      .rollover-value.old {
+        color: #718096;
+        text-decoration: line-through;
+      }
+
+      .rollover-value.new {
+        color: #c53030;
+        font-size: 18px;
+      }
+
+      .modal-warning {
+        background: #fffaf0;
+        border: 2px solid #dd6b20;
+        padding: 15px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #744210;
+        line-height: 1.6;
+      }
+
+      .modal-button {
+        width: 100%;
+        padding: 15px;
+        background: #2c5282;
+        color: #f7f7f7;
+        border: 2px solid #2d3748;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-family: Georgia, serif;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all 0.2s;
+      }
+
+      .modal-button:hover {
+        background: #1a365d;
+      }
+
+      .modal-button:active {
+        transform: translateY(1px);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideDown {
+        from {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      /* Debug Panel */
+      .debug-toggle {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 60px;
+        height: 60px;
+        background: #2d3748;
+        color: white;
+        border: 2px solid #4a5568;
+        border-radius: 50%;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 9998;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .debug-toggle:hover {
+        background: #4a5568;
+      }
+
+      .debug-panel {
+        position: fixed;
+        bottom: 90px;
+        left: 20px;
+        width: 350px;
+        max-height: 500px;
+        overflow-y: auto;
+        background: #1a202c;
+        color: #e2e8f0;
+        border: 2px solid #4a5568;
+        padding: 15px;
+        font-family: "Courier New", monospace;
+        font-size: 11px;
+        z-index: 9998;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        display: none;
+      }
+
+      .debug-panel.show {
+        display: block;
+      }
+
+      .debug-panel h3 {
+        color: #48bb78;
+        font-size: 13px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #4a5568;
+        padding-bottom: 5px;
+      }
+
+      .debug-line {
+        padding: 3px 0;
+        line-height: 1.5;
+      }
+
+      .debug-label {
+        color: #90cdf4;
+      }
+
+      .debug-value {
+        color: #fbd38d;
+      }
+
+      .debug-button {
+        width: 100%;
+        padding: 8px;
+        margin-top: 8px;
+        background: #2c5282;
+        color: white;
+        border: 1px solid #4a5568;
+        cursor: pointer;
+        font-size: 11px;
+        font-family: "Courier New", monospace;
+      }
+
+      .debug-button:hover {
+        background: #2b6cb0;
+      }
+
+      .debug-log {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #4a5568;
+        max-height: 150px;
+        overflow-y: auto;
+      }
+
+      .debug-log-entry {
+        padding: 2px 0;
+        color: #cbd5e0;
+        font-size: 10px;
+      }
+
+      .debug-log-entry.error {
+        color: #fc8181;
+      }
+
+      .debug-log-entry.success {
+        color: #68d391;
+      }
     </style>
   </head>
   <body>
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Debug Panel -->
+    <button class="debug-toggle" onclick="toggleDebugPanel()" title="Toggle Debug Panel">
+      🐛
+    </button>
+    <div class="debug-panel" id="debugPanel">
+      <h3>DEBUG PANEL</h3>
+      <div id="debugContent"></div>
+      <button class="debug-button" onclick="toggleTestMode()">
+        Toggle Test Mode
+      </button>
+      <button class="debug-button" onclick="setYesterdayDate()">
+        Set Date to Yesterday
+      </button>
+      <button class="debug-button" onclick="forceRolloverTest()">
+        Force Rollover (Test)
+      </button>
+      <button class="debug-button" onclick="clearDebugLog()">
+        Clear Log
+      </button>
+      <div class="debug-log" id="debugLog"></div>
+    </div>
+
+    <!-- Day Rollover Modal -->
+    <div class="modal-overlay" id="rolloverModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title">⚠️ DAY END REPORT ⚠️</div>
+          <div class="modal-subtitle" id="modalSubtitle">New Day Detected</div>
+        </div>
+        <div class="modal-body">
+          <div class="modal-warning">
+            <strong>NOTICE:</strong> One or more days have passed since your last session. Management fees and debt penalties have been automatically applied per your debt agreement.
+          </div>
+          <div class="rollover-summary" id="rolloverSummary">
+            <!-- Dynamically populated -->
+          </div>
+          <button class="modal-button" onclick="closeRolloverModal()">
+            Acknowledge & Continue
+          </button>
+        </div>
+      </div>
+    </div>
 
     <div class="header-seal">
       <div class="department-title">Department of Physical Treasury</div>
@@ -909,6 +1212,12 @@
         lastSyncTime: null,
       };
 
+      // Rollover tracking (for modal display)
+      let rolloverData = null;
+
+      // Test mode flag (bypasses cloud sync for testing)
+      let testMode = false;
+
       // Constants
       const USD_TO_RMB = 7;
       const MGMT_FEE = 50;
@@ -924,12 +1233,33 @@
 
       // Initialize app
       async function init() {
+        debugLog('🚀 App initializing...', 'success');
         loadState();
+        debugLog(`Loaded state: debt=${state.debt}, credit=${state.credit}, lastCheckDate=${state.lastCheckDate}`);
         await checkDayRollover();
         updateDisplay();
         loadExerciseValues();
         loadAppKey();
         updateSyncStatus();
+        updateDebugPanel();
+
+        // Start periodic day check (every 60 seconds)
+        startDayMonitor();
+        debugLog('✓ Day monitor started (checks every 60s)', 'success');
+      }
+
+      // Monitor for day changes while app is open
+      function startDayMonitor() {
+        setInterval(async () => {
+          const today = getDateString();
+          debugLog(`⏰ Monitor check: today=${today}, lastCheckDate=${state.lastCheckDate}`);
+          if (state.lastCheckDate && state.lastCheckDate !== today) {
+            debugLog('🔔 Day change detected! Applying rollover...', 'success');
+            await checkDayRollover();
+            updateDisplay();
+            updateDebugPanel();
+          }
+        }, 60000); // Check every 60 seconds
       }
 
       // LocalStorage functions
@@ -1321,13 +1651,20 @@
         const today = getDateString();
         const lastDate = state.lastCheckDate;
 
-        // If we have an app key and a day has passed, check cloud first
-        if (state.appKey && lastDate && lastDate !== today) {
+        debugLog(`📅 checkDayRollover: today=${today}, lastCheckDate=${lastDate}`);
+
+        // If we have an app key and a day has passed, check cloud first (unless in test mode)
+        if (state.appKey && lastDate && lastDate !== today && !testMode) {
+          debugLog('☁️ Cloud sync enabled, checking cloud first...');
           await syncFromCloudSilent();
+        } else if (testMode) {
+          debugLog('🧪 TEST MODE: Skipping cloud sync check');
         }
 
         // Re-check after potential cloud sync
         const currentLastDate = state.lastCheckDate;
+        debugLog(`After cloud check: currentLastDate=${currentLastDate}, today=${getDateString()}`);
+
         if (currentLastDate && currentLastDate !== today) {
           // Calculate days passed
           const last = new Date(currentLastDate);
@@ -1336,8 +1673,28 @@
             (current - last) / (1000 * 60 * 60 * 24)
           );
 
+          debugLog(`📅 Days passed: ${daysPassed}`, 'success');
+
+          // Capture initial state before any rollovers
+          const initialDebt = state.debt;
+          const initialCredit = state.credit;
+          const rolloverDetails = [];
+
+          debugLog(`Starting rollover: debt=${initialDebt}, credit=${initialCredit}`);
+
           for (let i = 0; i < daysPassed; i++) {
+            const beforeDebt = state.debt;
+            const beforeCredit = state.credit;
+            debugLog(`Day ${i + 1}: Before - debt=${beforeDebt}, credit=${beforeCredit}`);
             applyDayEnd();
+            debugLog(`Day ${i + 1}: After - debt=${state.debt}, credit=${state.credit}`, 'success');
+            rolloverDetails.push({
+              beforeDebt,
+              beforeCredit,
+              afterDebt: state.debt,
+              afterCredit: state.credit,
+              mgmtFee: MGMT_FEE,
+            });
           }
 
           state.lastCheckDate = today;
@@ -1345,29 +1702,42 @@
 
           // Sync after day rollover
           syncToCloud();
+
+          // Show modal with rollover summary
+          debugLog(`📊 Showing rollover modal: ${daysPassed} day(s), debt ${initialDebt} → ${state.debt}`, 'success');
+          showRolloverModal(
+            daysPassed,
+            initialDebt,
+            initialCredit,
+            state.debt,
+            state.credit,
+            rolloverDetails
+          );
         } else if (!currentLastDate || currentLastDate !== today) {
+          debugLog('First time setup detected');
           // First time setup or date mismatch
           state.lastCheckDate = today;
           saveState();
+        } else {
+          debugLog('✓ No rollover needed - same day', 'success');
         }
       }
 
       function applyDayEnd() {
-        let newDebt = state.debt;
-
-        // Apply management fee
-        newDebt += MGMT_FEE;
-
-        // Double the total debt
-        newDebt *= 2;
-
         const oldDebt = state.debt;
         const oldCredit = state.credit;
+
+        // Step 1: Double yesterday's debt
+        let newDebt = state.debt * 2;
+
+        // Step 2: Add today's management fee (not doubled)
+        newDebt += MGMT_FEE;
+
         state.debt = newDebt;
         state.credit = 0; // Reset credit every night
 
         // Add system transaction
-        let description = `Day end: +${MGMT_FEE} mgmt fee, then doubled`;
+        let description = `Day end: debt doubled (${oldDebt.toFixed(0)} × 2 = ${(oldDebt * 2).toFixed(0)}), then +${MGMT_FEE} mgmt fee`;
         if (oldCredit > 0) {
           description += `, ${oldCredit.toFixed(0)} RMB credit forfeited`;
         }
@@ -1671,6 +2041,243 @@
           location.reload();
         }
       }
+
+      // Modal functions
+      function showRolloverModal(
+        daysPassed,
+        initialDebt,
+        initialCredit,
+        finalDebt,
+        finalCredit,
+        details
+      ) {
+        const modal = document.getElementById("rolloverModal");
+        const subtitle = document.getElementById("modalSubtitle");
+        const summary = document.getElementById("rolloverSummary");
+
+        // Update subtitle
+        if (daysPassed === 1) {
+          subtitle.textContent = "1 Day Has Passed";
+        } else {
+          subtitle.textContent = `${daysPassed} Days Have Passed`;
+        }
+
+        // Build summary HTML
+        let summaryHTML = "";
+
+        // Show each day's rollover if multiple days
+        if (daysPassed > 1) {
+          details.forEach((day, index) => {
+            const doubled = day.beforeDebt * 2;
+            summaryHTML += `
+              <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #cbd5e0;">
+                <div style="font-weight: bold; margin-bottom: 8px; color: #2d3748;">Day ${
+                  index + 1
+                }:</div>
+                <div class="rollover-line">
+                  <span class="rollover-label">Starting Debt:</span>
+                  <span class="rollover-value">${day.beforeDebt.toFixed(
+                    0
+                  )} RMB</span>
+                </div>
+                <div class="rollover-line">
+                  <span class="rollover-label">× Overnight Penalty (2x):</span>
+                  <span class="rollover-value">${doubled.toFixed(0)} RMB</span>
+                </div>
+                <div class="rollover-line">
+                  <span class="rollover-label">+ Daily Management Fee:</span>
+                  <span class="rollover-value">+${day.mgmtFee} RMB</span>
+                </div>
+                <div class="rollover-line">
+                  <span class="rollover-label">Ending Debt:</span>
+                  <span class="rollover-value">${day.afterDebt.toFixed(
+                    0
+                  )} RMB</span>
+                </div>
+                ${
+                  day.beforeCredit > 0
+                    ? `<div class="rollover-line">
+                  <span class="rollover-label">Credit Forfeited:</span>
+                  <span class="rollover-value">-${day.beforeCredit.toFixed(
+                    0
+                  )} RMB</span>
+                </div>`
+                    : ""
+                }
+              </div>
+            `;
+          });
+        }
+
+        // Show overall summary
+        summaryHTML += `
+          <div class="rollover-line">
+            <span class="rollover-label">Your Debt on ${
+              state.lastCheckDate
+            }:</span>
+            <span class="rollover-value old">${initialDebt.toFixed(
+              0
+            )} RMB</span>
+          </div>
+          ${
+            initialCredit > 0
+              ? `<div class="rollover-line">
+            <span class="rollover-label">Credit Forfeited:</span>
+            <span class="rollover-value">-${initialCredit.toFixed(0)} RMB</span>
+          </div>`
+              : ""
+          }
+          <div class="rollover-line total">
+            <span class="rollover-label">New Debt Today:</span>
+            <span class="rollover-value new">${finalDebt.toFixed(0)} RMB</span>
+          </div>
+        `;
+
+        summary.innerHTML = summaryHTML;
+
+        // Show modal with animation
+        modal.classList.add("show");
+      }
+
+      function closeRolloverModal() {
+        const modal = document.getElementById("rolloverModal");
+        modal.classList.remove("show");
+      }
+
+      // Debug Panel Functions
+      function toggleDebugPanel() {
+        const panel = document.getElementById("debugPanel");
+        panel.classList.toggle("show");
+        if (panel.classList.contains("show")) {
+          updateDebugPanel();
+        }
+      }
+
+      function updateDebugPanel() {
+        const content = document.getElementById("debugContent");
+        const today = getDateString();
+        const now = new Date().toLocaleTimeString();
+
+        content.innerHTML = `
+          <div class="debug-line">
+            <span class="debug-label">🧪 Test Mode:</span>
+            <span class="debug-value" style="color: ${testMode ? '#68d391' : '#cbd5e0'}">${testMode ? 'ENABLED' : 'disabled'}</span>
+          </div>
+          <div class="debug-line">
+            <span class="debug-label">Current Time:</span>
+            <span class="debug-value">${now}</span>
+          </div>
+          <div class="debug-line">
+            <span class="debug-label">Today's Date:</span>
+            <span class="debug-value">${today}</span>
+          </div>
+          <div class="debug-line">
+            <span class="debug-label">Last Check Date:</span>
+            <span class="debug-value">${state.lastCheckDate || 'null'}</span>
+          </div>
+          <div class="debug-line">
+            <span class="debug-label">Debt:</span>
+            <span class="debug-value">${state.debt.toFixed(2)} RMB</span>
+          </div>
+          <div class="debug-line">
+            <span class="debug-label">Credit:</span>
+            <span class="debug-value">${state.credit.toFixed(2)} RMB</span>
+          </div>
+          <div class="debug-line">
+            <span class="debug-label">App Key:</span>
+            <span class="debug-value">${state.appKey || 'none'}</span>
+          </div>
+          <div class="debug-line">
+            <span class="debug-label">Transactions:</span>
+            <span class="debug-value">${state.transactions.length}</span>
+          </div>
+          <div class="debug-line">
+            <span class="debug-label">Day Match:</span>
+            <span class="debug-value">${state.lastCheckDate === today ? '✓ SAME' : '✗ DIFFERENT'}</span>
+          </div>
+        `;
+      }
+
+      function debugLog(message, type = 'info') {
+        console.log(`[DEBUG] ${message}`);
+
+        const logDiv = document.getElementById("debugLog");
+        if (!logDiv) return;
+
+        const entry = document.createElement("div");
+        entry.className = `debug-log-entry ${type}`;
+        const timestamp = new Date().toLocaleTimeString();
+        entry.textContent = `[${timestamp}] ${message}`;
+
+        logDiv.insertBefore(entry, logDiv.firstChild);
+
+        // Keep only last 50 entries
+        while (logDiv.children.length > 50) {
+          logDiv.removeChild(logDiv.lastChild);
+        }
+      }
+
+      function clearDebugLog() {
+        const logDiv = document.getElementById("debugLog");
+        if (logDiv) {
+          logDiv.innerHTML = '';
+        }
+        debugLog('Log cleared', 'success');
+      }
+
+      function forceRolloverTest() {
+        debugLog('🧪 FORCE ROLLOVER TEST initiated', 'success');
+        debugLog(`Before: debt=${state.debt}, credit=${state.credit}, lastCheckDate=${state.lastCheckDate}`);
+
+        // Enable test mode to bypass cloud sync
+        testMode = true;
+        debugLog('Test mode ENABLED (bypassing cloud sync)');
+        updateDebugPanel();
+
+        // Force trigger rollover check
+        checkDayRollover().then(() => {
+          updateDisplay();
+          updateDebugPanel();
+          debugLog('✓ Force rollover completed', 'success');
+
+          // Disable test mode after a delay
+          setTimeout(() => {
+            testMode = false;
+            debugLog('Test mode disabled');
+            updateDebugPanel();
+          }, 2000);
+        });
+      }
+
+      function setYesterdayDate() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+        // Enable test mode
+        testMode = true;
+        debugLog('🧪 Test mode ENABLED');
+
+        debugLog(`Setting lastCheckDate to ${yesterdayStr}`, 'success');
+        state.lastCheckDate = yesterdayStr;
+        saveState();
+        updateDebugPanel();
+        debugLog('✓ Date set. Now click "Force Rollover" or wait up to 60s', 'success');
+      }
+
+      function toggleTestMode() {
+        testMode = !testMode;
+        debugLog(`🧪 Test mode ${testMode ? 'ENABLED' : 'DISABLED'}`, testMode ? 'success' : 'info');
+        updateDebugPanel();
+      }
+
+      // Auto-update debug panel every 5 seconds if open
+      setInterval(() => {
+        const panel = document.getElementById("debugPanel");
+        if (panel && panel.classList.contains("show")) {
+          updateDebugPanel();
+        }
+      }, 5000);
 
       // Initialize on load
       init();
