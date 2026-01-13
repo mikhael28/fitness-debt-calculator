@@ -812,13 +812,63 @@
       .debug-log-entry.success {
         color: #68d391;
       }
+
+      /* Refresh button */
+      .refresh-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 36px;
+        height: 36px;
+        background: #f7fafc;
+        border: 2px solid #4a5568;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        opacity: 0.7;
+      }
+
+      .refresh-btn:hover {
+        opacity: 1;
+        background: #e2e8f0;
+        transform: scale(1.05);
+      }
+
+      .refresh-btn:active {
+        transform: scale(0.95);
+      }
+
+      .refresh-btn.spinning {
+        animation: spin 0.6s linear;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .refresh-icon {
+        font-size: 18px;
+        line-height: 1;
+      }
     </style>
   </head>
   <body>
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Debug Panel -->
-    <button class="debug-toggle" onclick="toggleDebugPanel()" title="Toggle Debug Panel">
+    <button
+      class="debug-toggle"
+      onclick="toggleDebugPanel()"
+      title="Toggle Debug Panel"
+    >
       🐛
     </button>
     <div class="debug-panel" id="debugPanel">
@@ -833,9 +883,7 @@
       <button class="debug-button" onclick="forceRolloverTest()">
         Force Rollover (Test)
       </button>
-      <button class="debug-button" onclick="clearDebugLog()">
-        Clear Log
-      </button>
+      <button class="debug-button" onclick="clearDebugLog()">Clear Log</button>
       <div class="debug-log" id="debugLog"></div>
     </div>
 
@@ -848,7 +896,9 @@
         </div>
         <div class="modal-body">
           <div class="modal-warning">
-            <strong>NOTICE:</strong> One or more days have passed since your last session. Management fees and debt penalties have been automatically applied per your debt agreement.
+            <strong>NOTICE:</strong> One or more days have passed since your
+            last session. Management fees and debt penalties have been
+            automatically applied per your debt agreement.
           </div>
           <div class="rollover-summary" id="rolloverSummary">
             <!-- Dynamically populated -->
@@ -866,6 +916,15 @@
     </div>
 
     <div class="debt-display">
+      <button
+        id="refreshBtn"
+        class="refresh-btn"
+        onclick="refreshFromCloud()"
+        title="Sync from cloud"
+        style="display: none"
+      >
+        <span class="refresh-icon">↻</span>
+      </button>
       <div class="balance-row">
         <div class="balance-item">
           <div class="balance-label">Outstanding Debt</div>
@@ -1233,9 +1292,11 @@
 
       // Initialize app
       async function init() {
-        debugLog('🚀 App initializing...', 'success');
+        debugLog("🚀 App initializing...", "success");
         loadState();
-        debugLog(`Loaded state: debt=${state.debt}, credit=${state.credit}, lastCheckDate=${state.lastCheckDate}`);
+        debugLog(
+          `Loaded state: debt=${state.debt}, credit=${state.credit}, lastCheckDate=${state.lastCheckDate}`
+        );
         await checkDayRollover();
         updateDisplay();
         loadExerciseValues();
@@ -1245,16 +1306,18 @@
 
         // Start periodic day check (every 60 seconds)
         startDayMonitor();
-        debugLog('✓ Day monitor started (checks every 60s)', 'success');
+        debugLog("✓ Day monitor started (checks every 60s)", "success");
       }
 
       // Monitor for day changes while app is open
       function startDayMonitor() {
         setInterval(async () => {
           const today = getDateString();
-          debugLog(`⏰ Monitor check: today=${today}, lastCheckDate=${state.lastCheckDate}`);
+          debugLog(
+            `⏰ Monitor check: today=${today}, lastCheckDate=${state.lastCheckDate}`
+          );
           if (state.lastCheckDate && state.lastCheckDate !== today) {
-            debugLog('🔔 Day change detected! Applying rollover...', 'success');
+            debugLog("🔔 Day change detected! Applying rollover...", "success");
             await checkDayRollover();
             updateDisplay();
             updateDebugPanel();
@@ -1299,6 +1362,7 @@
         state.appKey = appKey;
         saveState();
         updateSyncStatus();
+        updateRefreshButton();
 
         // First, try to PULL from cloud to see if this key already exists
         try {
@@ -1597,6 +1661,88 @@
         }
       }
 
+      async function refreshFromCloud() {
+        if (!state.appKey) {
+          return;
+        }
+
+        const refreshBtn = document.getElementById("refreshBtn");
+        if (refreshBtn) {
+          refreshBtn.classList.add("spinning");
+        }
+
+        try {
+          const response = await fetch(
+            `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${state.appKey}/fitnessdebt`
+          );
+          const cloudData = await response.text();
+
+          console.log("Refreshing from cloud:", cloudData);
+
+          if (cloudData && cloudData !== "null" && cloudData !== "") {
+            const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
+            const parts = cleanData.split("|");
+            if (parts.length === 3) {
+              const debt = parseFloat(parts[0]);
+              const credit = parseFloat(parts[1]);
+              const lastCheckDate = parts[2];
+
+              if (!isNaN(debt) && !isNaN(credit) && lastCheckDate) {
+                // Check if data is different
+                if (
+                  state.debt !== debt ||
+                  state.credit !== credit ||
+                  state.lastCheckDate !== lastCheckDate
+                ) {
+                  state.debt = debt;
+                  state.credit = credit;
+                  state.lastCheckDate = lastCheckDate;
+                  state.lastSyncTime = new Date().toISOString();
+                  saveState();
+                  updateDisplay();
+                  updateSyncStatus();
+                  showToast("✓ Synced from cloud");
+                } else {
+                  showToast("✓ Already up to date");
+                }
+              }
+            } else if (parts.length === 2) {
+              // Legacy format
+              const debt = parseFloat(parts[0]);
+              const lastCheckDate = parts[1];
+
+              if (!isNaN(debt) && lastCheckDate) {
+                if (
+                  state.debt !== debt ||
+                  state.lastCheckDate !== lastCheckDate
+                ) {
+                  state.debt = debt;
+                  state.credit = 0;
+                  state.lastCheckDate = lastCheckDate;
+                  state.lastSyncTime = new Date().toISOString();
+                  saveState();
+                  updateDisplay();
+                  updateSyncStatus();
+                  showToast("✓ Synced from cloud");
+                } else {
+                  showToast("✓ Already up to date");
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Refresh error:", error);
+          showToast("✗ Sync failed");
+        }
+
+        // Remove spinning animation
+        setTimeout(() => {
+          if (refreshBtn) {
+            refreshBtn.classList.remove("spinning");
+          }
+        }, 600);
+      }
+
       function loadAppKey() {
         if (state.appKey) {
           document.getElementById("appKeyInput").value = state.appKey;
@@ -1634,8 +1780,12 @@
 
       // Date utilities
       function getDateString() {
+        // Use LOCAL timezone instead of UTC to prevent rollover at wrong time
         const now = new Date();
-        return now.toISOString().split("T")[0];
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
       }
 
       function getTimeString() {
@@ -1651,19 +1801,23 @@
         const today = getDateString();
         const lastDate = state.lastCheckDate;
 
-        debugLog(`📅 checkDayRollover: today=${today}, lastCheckDate=${lastDate}`);
+        debugLog(
+          `📅 checkDayRollover: today=${today}, lastCheckDate=${lastDate}`
+        );
 
         // If we have an app key and a day has passed, check cloud first (unless in test mode)
         if (state.appKey && lastDate && lastDate !== today && !testMode) {
-          debugLog('☁️ Cloud sync enabled, checking cloud first...');
+          debugLog("☁️ Cloud sync enabled, checking cloud first...");
           await syncFromCloudSilent();
         } else if (testMode) {
-          debugLog('🧪 TEST MODE: Skipping cloud sync check');
+          debugLog("🧪 TEST MODE: Skipping cloud sync check");
         }
 
         // Re-check after potential cloud sync
         const currentLastDate = state.lastCheckDate;
-        debugLog(`After cloud check: currentLastDate=${currentLastDate}, today=${getDateString()}`);
+        debugLog(
+          `After cloud check: currentLastDate=${currentLastDate}, today=${getDateString()}`
+        );
 
         if (currentLastDate && currentLastDate !== today) {
           // Calculate days passed
@@ -1673,21 +1827,32 @@
             (current - last) / (1000 * 60 * 60 * 24)
           );
 
-          debugLog(`📅 Days passed: ${daysPassed}`, 'success');
+          debugLog(`📅 Days passed: ${daysPassed}`, "success");
 
           // Capture initial state before any rollovers
           const initialDebt = state.debt;
           const initialCredit = state.credit;
           const rolloverDetails = [];
 
-          debugLog(`Starting rollover: debt=${initialDebt}, credit=${initialCredit}`);
+          debugLog(
+            `Starting rollover: debt=${initialDebt}, credit=${initialCredit}`
+          );
 
           for (let i = 0; i < daysPassed; i++) {
             const beforeDebt = state.debt;
             const beforeCredit = state.credit;
-            debugLog(`Day ${i + 1}: Before - debt=${beforeDebt}, credit=${beforeCredit}`);
+            debugLog(
+              `Day ${
+                i + 1
+              }: Before - debt=${beforeDebt}, credit=${beforeCredit}`
+            );
             applyDayEnd();
-            debugLog(`Day ${i + 1}: After - debt=${state.debt}, credit=${state.credit}`, 'success');
+            debugLog(
+              `Day ${i + 1}: After - debt=${state.debt}, credit=${
+                state.credit
+              }`,
+              "success"
+            );
             rolloverDetails.push({
               beforeDebt,
               beforeCredit,
@@ -1704,7 +1869,10 @@
           syncToCloud();
 
           // Show modal with rollover summary
-          debugLog(`📊 Showing rollover modal: ${daysPassed} day(s), debt ${initialDebt} → ${state.debt}`, 'success');
+          debugLog(
+            `📊 Showing rollover modal: ${daysPassed} day(s), debt ${initialDebt} → ${state.debt}`,
+            "success"
+          );
           showRolloverModal(
             daysPassed,
             initialDebt,
@@ -1714,12 +1882,12 @@
             rolloverDetails
           );
         } else if (!currentLastDate || currentLastDate !== today) {
-          debugLog('First time setup detected');
+          debugLog("First time setup detected");
           // First time setup or date mismatch
           state.lastCheckDate = today;
           saveState();
         } else {
-          debugLog('✓ No rollover needed - same day', 'success');
+          debugLog("✓ No rollover needed - same day", "success");
         }
       }
 
@@ -1737,7 +1905,9 @@
         state.credit = 0; // Reset credit every night
 
         // Add system transaction
-        let description = `Day end: debt doubled (${oldDebt.toFixed(0)} × 2 = ${(oldDebt * 2).toFixed(0)}), then +${MGMT_FEE} mgmt fee`;
+        let description = `Day end: debt doubled (${oldDebt.toFixed(
+          0
+        )} × 2 = ${(oldDebt * 2).toFixed(0)}), then +${MGMT_FEE} mgmt fee`;
         if (oldCredit > 0) {
           description += `, ${oldCredit.toFixed(0)} RMB credit forfeited`;
         }
@@ -1935,6 +2105,18 @@
         document.getElementById("creditAmount").textContent =
           state.credit.toFixed(0);
         updateTransactionList();
+        updateRefreshButton();
+      }
+
+      function updateRefreshButton() {
+        const refreshBtn = document.getElementById("refreshBtn");
+        if (refreshBtn) {
+          if (state.appKey) {
+            refreshBtn.style.display = "flex";
+          } else {
+            refreshBtn.style.display = "none";
+          }
+        }
       }
 
       function updateTransactionList() {
@@ -2161,7 +2343,9 @@
         content.innerHTML = `
           <div class="debug-line">
             <span class="debug-label">🧪 Test Mode:</span>
-            <span class="debug-value" style="color: ${testMode ? '#68d391' : '#cbd5e0'}">${testMode ? 'ENABLED' : 'disabled'}</span>
+            <span class="debug-value" style="color: ${
+              testMode ? "#68d391" : "#cbd5e0"
+            }">${testMode ? "ENABLED" : "disabled"}</span>
           </div>
           <div class="debug-line">
             <span class="debug-label">Current Time:</span>
@@ -2173,7 +2357,7 @@
           </div>
           <div class="debug-line">
             <span class="debug-label">Last Check Date:</span>
-            <span class="debug-value">${state.lastCheckDate || 'null'}</span>
+            <span class="debug-value">${state.lastCheckDate || "null"}</span>
           </div>
           <div class="debug-line">
             <span class="debug-label">Debt:</span>
@@ -2185,7 +2369,7 @@
           </div>
           <div class="debug-line">
             <span class="debug-label">App Key:</span>
-            <span class="debug-value">${state.appKey || 'none'}</span>
+            <span class="debug-value">${state.appKey || "none"}</span>
           </div>
           <div class="debug-line">
             <span class="debug-label">Transactions:</span>
@@ -2193,12 +2377,14 @@
           </div>
           <div class="debug-line">
             <span class="debug-label">Day Match:</span>
-            <span class="debug-value">${state.lastCheckDate === today ? '✓ SAME' : '✗ DIFFERENT'}</span>
+            <span class="debug-value">${
+              state.lastCheckDate === today ? "✓ SAME" : "✗ DIFFERENT"
+            }</span>
           </div>
         `;
       }
 
-      function debugLog(message, type = 'info') {
+      function debugLog(message, type = "info") {
         console.log(`[DEBUG] ${message}`);
 
         const logDiv = document.getElementById("debugLog");
@@ -2220,30 +2406,32 @@
       function clearDebugLog() {
         const logDiv = document.getElementById("debugLog");
         if (logDiv) {
-          logDiv.innerHTML = '';
+          logDiv.innerHTML = "";
         }
-        debugLog('Log cleared', 'success');
+        debugLog("Log cleared", "success");
       }
 
       function forceRolloverTest() {
-        debugLog('🧪 FORCE ROLLOVER TEST initiated', 'success');
-        debugLog(`Before: debt=${state.debt}, credit=${state.credit}, lastCheckDate=${state.lastCheckDate}`);
+        debugLog("🧪 FORCE ROLLOVER TEST initiated", "success");
+        debugLog(
+          `Before: debt=${state.debt}, credit=${state.credit}, lastCheckDate=${state.lastCheckDate}`
+        );
 
         // Enable test mode to bypass cloud sync
         testMode = true;
-        debugLog('Test mode ENABLED (bypassing cloud sync)');
+        debugLog("Test mode ENABLED (bypassing cloud sync)");
         updateDebugPanel();
 
         // Force trigger rollover check
         checkDayRollover().then(() => {
           updateDisplay();
           updateDebugPanel();
-          debugLog('✓ Force rollover completed', 'success');
+          debugLog("✓ Force rollover completed", "success");
 
           // Disable test mode after a delay
           setTimeout(() => {
             testMode = false;
-            debugLog('Test mode disabled');
+            debugLog("Test mode disabled");
             updateDebugPanel();
           }, 2000);
         });
@@ -2252,22 +2440,28 @@
       function setYesterdayDate() {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
 
         // Enable test mode
         testMode = true;
-        debugLog('🧪 Test mode ENABLED');
+        debugLog("🧪 Test mode ENABLED");
 
-        debugLog(`Setting lastCheckDate to ${yesterdayStr}`, 'success');
+        debugLog(`Setting lastCheckDate to ${yesterdayStr}`, "success");
         state.lastCheckDate = yesterdayStr;
         saveState();
         updateDebugPanel();
-        debugLog('✓ Date set. Now click "Force Rollover" or wait up to 60s', 'success');
+        debugLog(
+          '✓ Date set. Now click "Force Rollover" or wait up to 60s',
+          "success"
+        );
       }
 
       function toggleTestMode() {
         testMode = !testMode;
-        debugLog(`🧪 Test mode ${testMode ? 'ENABLED' : 'DISABLED'}`, testMode ? 'success' : 'info');
+        debugLog(
+          `🧪 Test mode ${testMode ? "ENABLED" : "DISABLED"}`,
+          testMode ? "success" : "info"
+        );
         updateDebugPanel();
       }
 
