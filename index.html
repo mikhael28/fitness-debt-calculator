@@ -934,7 +934,7 @@
         <div class="balance-item">
           <div class="balance-label">Daily Credit</div>
           <div class="credit-amount" id="creditAmount">0</div>
-          <div class="balance-unit">RMB (Resets Nightly)</div>
+          <div class="balance-unit">RMB (Rolls Over -50 Fee)</div>
         </div>
       </div>
     </div>
@@ -1051,6 +1051,26 @@
               </button>
             </div>
           </div>
+
+          <div class="exercise-quick-item">
+            <div class="exercise-name">Hike</div>
+            <div class="quick-buttons">
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd(this, 'hike', 15)"
+              >
+                15m
+              </button>
+              <button
+                type="button"
+                class="quick-btn"
+                onclick="quickAdd(this, 'hike', 30)"
+              >
+                30m
+              </button>
+            </div>
+          </div>
         </div>
         <form id="exerciseForm" class="quick-add-section">
           <div class="form-group">
@@ -1062,6 +1082,7 @@
               <option value="curls">Curls</option>
               <option value="bench">Bench Press</option>
               <option value="plank">Plank (minutes)</option>
+              <option value="hike">Hike (minutes)</option>
             </select>
           </div>
           <div class="form-group">
@@ -1086,7 +1107,8 @@
         <div class="info-box">
           NOTICE: Purchases cost 7 RMB per USD. Daily credit (if available) is
           used first with no penalty. Credit purchases (when in debt) incur
-          double cost penalty. Credit resets to zero every night.
+          double cost penalty. Credit rolls over to the next day but loses 50 RMB
+          management fee overnight.
         </div>
         <form id="purchaseForm">
           <div class="form-group">
@@ -1153,6 +1175,11 @@
         <div class="exercise-config">
           <label>Plank (per minute)</label>
           <input type="number" id="valuePlank" value="30" min="0" step="0.1" />
+        </div>
+
+        <div class="exercise-config">
+          <label>Hike (per minute)</label>
+          <input type="number" id="valueHike" value="1" min="0" step="0.1" />
         </div>
 
         <button class="btn-secondary" onclick="saveExerciseValues()">
@@ -1244,9 +1271,17 @@
             <div><strong>Credit Penalty:</strong></div>
             <div>2x purchase cost</div>
             <div><strong>Credit Rollover:</strong></div>
-            <div>None (resets nightly)</div>
+            <div id="creditRolloverStatus">Yes (-50 RMB fee)</div>
           </div>
         </div>
+
+        <div style="border-top: 1px dashed #cbd5e0; padding-top: 15px; margin-top: 15px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <input type="checkbox" id="noCreditRollover" onchange="toggleCreditRollover()" style="width: auto;">
+            <label for="noCreditRollover" style="margin: 0; cursor: pointer;">No Credit Rollover (reset to 0 each night)</label>
+          </div>
+        </div>
+
         <button class="btn-secondary" onclick="resetApp()">
           Reset All Data
         </button>
@@ -1266,9 +1301,11 @@
           curls: 1,
           bench: 1,
           plank: 30,
+          hike: 1,
         },
         appKey: "",
         lastSyncTime: null,
+        noCreditRollover: false,
       };
 
       // Rollover tracking (for modal display)
@@ -1288,6 +1325,7 @@
         curls: "Curls",
         bench: "Bench Press",
         plank: "Plank",
+        hike: "Hike",
       };
 
       // Initialize app
@@ -1902,15 +1940,34 @@
         newDebt += MGMT_FEE;
 
         state.debt = newDebt;
-        state.credit = 0; // Reset credit every night
+
+        // Step 3: Handle credit rollover
+        let creditDescription = "";
+        if (state.noCreditRollover) {
+          // No rollover: reset credit to 0
+          state.credit = 0;
+          if (oldCredit > 0) {
+            creditDescription = `, ${oldCredit.toFixed(0)} RMB credit forfeited`;
+          }
+        } else {
+          // Rollover with management fee: credit loses 50 RMB
+          if (oldCredit > 0) {
+            const newCredit = Math.max(0, oldCredit - MGMT_FEE);
+            state.credit = newCredit;
+            if (newCredit > 0) {
+              creditDescription = `, credit ${oldCredit.toFixed(0)} → ${newCredit.toFixed(0)} RMB (-${MGMT_FEE} fee)`;
+            } else {
+              creditDescription = `, ${oldCredit.toFixed(0)} RMB credit consumed by fee`;
+            }
+          } else {
+            state.credit = 0;
+          }
+        }
 
         // Add system transaction
         let description = `Day end: debt doubled (${oldDebt.toFixed(
           0
-        )} × 2 = ${(oldDebt * 2).toFixed(0)}), then +${MGMT_FEE} mgmt fee`;
-        if (oldCredit > 0) {
-          description += `, ${oldCredit.toFixed(0)} RMB credit forfeited`;
-        }
+        )} × 2 = ${(oldDebt * 2).toFixed(0)}), then +${MGMT_FEE} mgmt fee${creditDescription}`;
 
         state.transactions.unshift({
           type: "system",
@@ -2044,7 +2101,7 @@
         recordExercise(type, amount);
 
         // Show toast notification
-        const unit = type === "plank" ? "min" : "reps";
+        const unit = (type === "plank" || type === "hike") ? "min" : "reps";
         showToast(`✓ Recorded ${amount} ${unit} of ${typeNames[type]}`);
 
         // Re-enable button after 3 seconds and reset styles
@@ -2060,7 +2117,7 @@
       function recordExercise(type, amount) {
         const value = state.exerciseValues[type];
         const rmb = amount * value;
-        const unit = type === "plank" ? "min" : "reps";
+        const unit = (type === "plank" || type === "hike") ? "min" : "reps";
 
         let description = `${typeNames[type]} (${amount} ${unit})`;
 
@@ -2106,6 +2163,7 @@
           state.credit.toFixed(0);
         updateTransactionList();
         updateRefreshButton();
+        updateCreditLabel();
       }
 
       function updateRefreshButton() {
@@ -2169,6 +2227,12 @@
           state.exerciseValues.bench;
         document.getElementById("valuePlank").value =
           state.exerciseValues.plank;
+        document.getElementById("valueHike").value =
+          state.exerciseValues.hike || 1;
+
+        // Load credit rollover setting
+        document.getElementById("noCreditRollover").checked = state.noCreditRollover || false;
+        updateCreditRolloverStatus();
       }
 
       function saveExerciseValues() {
@@ -2187,9 +2251,41 @@
         state.exerciseValues.plank = parseFloat(
           document.getElementById("valuePlank").value
         );
+        state.exerciseValues.hike = parseFloat(
+          document.getElementById("valueHike").value
+        );
 
         saveState();
         alert("Exercise values saved successfully.");
+      }
+
+      function toggleCreditRollover() {
+        state.noCreditRollover = document.getElementById("noCreditRollover").checked;
+        saveState();
+        updateCreditRolloverStatus();
+        updateCreditLabel();
+      }
+
+      function updateCreditRolloverStatus() {
+        const statusEl = document.getElementById("creditRolloverStatus");
+        if (statusEl) {
+          if (state.noCreditRollover) {
+            statusEl.textContent = "None (resets nightly)";
+          } else {
+            statusEl.textContent = "Yes (-50 RMB fee)";
+          }
+        }
+      }
+
+      function updateCreditLabel() {
+        const labelEl = document.querySelector('.balance-item:last-child .balance-unit');
+        if (labelEl) {
+          if (state.noCreditRollover) {
+            labelEl.textContent = "RMB (Resets Nightly)";
+          } else {
+            labelEl.textContent = "RMB (Rolls Over -50 Fee)";
+          }
+        }
       }
 
       // Tab switching
@@ -2278,12 +2374,15 @@
                 </div>
                 ${
                   day.beforeCredit > 0
-                    ? `<div class="rollover-line">
+                    ? (state.noCreditRollover
+                        ? `<div class="rollover-line">
                   <span class="rollover-label">Credit Forfeited:</span>
-                  <span class="rollover-value">-${day.beforeCredit.toFixed(
-                    0
-                  )} RMB</span>
+                  <span class="rollover-value">-${day.beforeCredit.toFixed(0)} RMB</span>
                 </div>`
+                        : `<div class="rollover-line">
+                  <span class="rollover-label">Credit Rollover:</span>
+                  <span class="rollover-value">${day.beforeCredit.toFixed(0)} → ${day.afterCredit.toFixed(0)} RMB (-${MGMT_FEE} fee)</span>
+                </div>`)
                     : ""
                 }
               </div>
@@ -2303,10 +2402,15 @@
           </div>
           ${
             initialCredit > 0
-              ? `<div class="rollover-line">
+              ? (state.noCreditRollover
+                  ? `<div class="rollover-line">
             <span class="rollover-label">Credit Forfeited:</span>
             <span class="rollover-value">-${initialCredit.toFixed(0)} RMB</span>
           </div>`
+                  : `<div class="rollover-line">
+            <span class="rollover-label">Credit After Fees:</span>
+            <span class="rollover-value">${initialCredit.toFixed(0)} → ${finalCredit.toFixed(0)} RMB</span>
+          </div>`)
               : ""
           }
           <div class="rollover-line total">
