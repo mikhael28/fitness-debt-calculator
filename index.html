@@ -1405,17 +1405,19 @@
         // First, try to PULL from cloud to see if this key already exists
         try {
           const response = await fetch(
-            `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${appKey}/fitnessdebt`
+            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${appKey}:fitnessdebt`
           );
-          const cloudData = await response.text();
+          let cloudData = null;
+          if (response.ok) {
+            const json = await response.json();
+            cloudData = json.value;
+          }
 
           console.log("Checking if key exists in cloud:", cloudData);
 
           // If data exists in cloud, load it first
-          if (cloudData && cloudData !== "null" && cloudData !== "") {
-            // Strip surrounding quotes if present (API returns "value" instead of value)
-            const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
-            const parts = cleanData.split("|");
+          if (cloudData) {
+            const parts = cloudData.split("|");
             if (parts.length === 3) {
               const debt = parseFloat(parts[0]);
               const credit = parseFloat(parts[1]);
@@ -1511,8 +1513,12 @@
           console.log("Syncing to cloud:", syncValue);
 
           const response = await fetch(
-            `https://keyvalue.immanuel.co/api/KeyVal/UpdateValue/${state.appKey}/fitnessdebt/${syncValue}`,
-            { method: "POST" }
+            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${state.appKey}:fitnessdebt`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ value: syncValue }),
+            }
           );
 
           console.log("Sync response status:", response.status);
@@ -1539,15 +1545,17 @@
 
         try {
           const response = await fetch(
-            `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${state.appKey}/fitnessdebt`
+            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${state.appKey}:fitnessdebt`
           );
-          const cloudData = await response.text();
+          let cloudData = null;
+          if (response.ok) {
+            const json = await response.json();
+            cloudData = json.value;
+          }
 
-          if (cloudData && cloudData !== "null" && cloudData !== "") {
-            // Strip surrounding quotes if present (API returns "value" instead of value)
-            const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
+          if (cloudData) {
             // Parse pipe-delimited format: debt|credit|lastCheckDate or debt|lastCheckDate (legacy)
-            const parts = cleanData.split("|");
+            const parts = cloudData.split("|");
             if (parts.length === 3) {
               const debt = parseFloat(parts[0]);
               const credit = parseFloat(parts[1]);
@@ -1598,17 +1606,19 @@
 
         try {
           const response = await fetch(
-            `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${appKey}/fitnessdebt`
+            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${appKey}:fitnessdebt`
           );
-          const cloudData = await response.text();
+          let cloudData = null;
+          if (response.ok) {
+            const json = await response.json();
+            cloudData = json.value;
+          }
 
           console.log("Loaded from cloud:", cloudData);
 
-          if (cloudData && cloudData !== "null" && cloudData !== "") {
-            // Strip surrounding quotes if present (API returns "value" instead of value)
-            const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
+          if (cloudData) {
             // Parse pipe-delimited format: debt|credit|lastCheckDate or debt|lastCheckDate (legacy)
-            const parts = cleanData.split("|");
+            const parts = cloudData.split("|");
             if (parts.length === 3) {
               const debt = parseFloat(parts[0]);
               const credit = parseFloat(parts[1]);
@@ -1711,15 +1721,18 @@
 
         try {
           const response = await fetch(
-            `https://keyvalue.immanuel.co/api/KeyVal/GetValue/${state.appKey}/fitnessdebt`
+            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${state.appKey}:fitnessdebt`
           );
-          const cloudData = await response.text();
+          let cloudData = null;
+          if (response.ok) {
+            const json = await response.json();
+            cloudData = json.value;
+          }
 
           console.log("Refreshing from cloud:", cloudData);
 
-          if (cloudData && cloudData !== "null" && cloudData !== "") {
-            const cleanData = cloudData.replace(/^"(.*)"$/, "$1");
-            const parts = cleanData.split("|");
+          if (cloudData) {
+            const parts = cloudData.split("|");
             if (parts.length === 3) {
               const debt = parseFloat(parts[0]);
               const credit = parseFloat(parts[1]);
