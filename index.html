@@ -1949,33 +1949,40 @@
         // Step 1: Double yesterday's debt
         let newDebt = state.debt * 2;
 
-        // Step 2: Add today's management fee (not doubled)
-        newDebt += MGMT_FEE;
-
-        state.debt = newDebt;
-
-        // Step 3: Handle credit rollover
+        // Step 2: Add today's management fee (not doubled).
+        // If credit rollover is enabled, credit absorbs as much of the fee as
+        // possible; only the remainder gets added to debt.
         let creditDescription = "";
         if (state.noCreditRollover) {
-          // No rollover: reset credit to 0
+          // No rollover: forfeit credit, add full fee to debt
+          newDebt += MGMT_FEE;
           state.credit = 0;
           if (oldCredit > 0) {
             creditDescription = `, ${oldCredit.toFixed(0)} RMB credit forfeited`;
           }
         } else {
-          // Rollover with management fee: credit loses 50 RMB
+          // Rollover: credit absorbs the fee first
           if (oldCredit > 0) {
-            const newCredit = Math.max(0, oldCredit - MGMT_FEE);
+            const creditUsed = Math.min(oldCredit, MGMT_FEE);
+            const remainingFee = MGMT_FEE - creditUsed;
+            const newCredit = oldCredit - creditUsed;
+            newDebt += remainingFee;
             state.credit = newCredit;
             if (newCredit > 0) {
               creditDescription = `, credit ${oldCredit.toFixed(0)} → ${newCredit.toFixed(0)} RMB (-${MGMT_FEE} fee)`;
             } else {
               creditDescription = `, ${oldCredit.toFixed(0)} RMB credit consumed by fee`;
+              if (remainingFee > 0) {
+                creditDescription += ` (+${remainingFee.toFixed(0)} RMB remaining fee added to debt)`;
+              }
             }
           } else {
+            newDebt += MGMT_FEE;
             state.credit = 0;
           }
         }
+
+        state.debt = newDebt;
 
         // Add system transaction
         let description = `Day end: debt doubled (${oldDebt.toFixed(
