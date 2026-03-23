@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -33,7 +33,8 @@
         padding: 20px;
         background: linear-gradient(to bottom, #1a365d 0%, #2c5282 100%);
         border: 3px solid #b8860b;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3),
+        box-shadow:
+          0 4px 6px rgba(0, 0, 0, 0.3),
           inset 0 1px 0 rgba(255, 255, 255, 0.1);
         position: relative;
       }
@@ -513,7 +514,9 @@
         font-size: 13px;
         font-weight: bold;
         letter-spacing: 0.5px;
-        animation: slideIn 0.3s ease-out, slideOut 0.3s ease-in 2.7s;
+        animation:
+          slideIn 0.3s ease-out,
+          slideOut 0.3s ease-in 2.7s;
         pointer-events: auto;
       }
 
@@ -1107,8 +1110,8 @@
         <div class="info-box">
           NOTICE: Purchases cost 7 RMB per USD. Daily credit (if available) is
           used first with no penalty. Credit purchases (when in debt) incur
-          double cost penalty. Credit rolls over to the next day but loses 50 RMB
-          management fee overnight.
+          double cost penalty. Credit rolls over to the next day but loses 50
+          RMB management fee overnight.
         </div>
         <form id="purchaseForm">
           <div class="form-group">
@@ -1275,10 +1278,30 @@
           </div>
         </div>
 
-        <div style="border-top: 1px dashed #cbd5e0; padding-top: 15px; margin-top: 15px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-            <input type="checkbox" id="noCreditRollover" onchange="toggleCreditRollover()" style="width: auto;">
-            <label for="noCreditRollover" style="margin: 0; cursor: pointer;">No Credit Rollover (reset to 0 each night)</label>
+        <div
+          style="
+            border-top: 1px dashed #cbd5e0;
+            padding-top: 15px;
+            margin-top: 15px;
+          "
+        >
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              margin-bottom: 15px;
+            "
+          >
+            <input
+              type="checkbox"
+              id="noCreditRollover"
+              onchange="toggleCreditRollover()"
+              style="width: auto"
+            />
+            <label for="noCreditRollover" style="margin: 0; cursor: pointer"
+              >No Credit Rollover (reset to 0 each night)</label
+            >
           </div>
         </div>
 
@@ -1333,7 +1356,7 @@
         debugLog("🚀 App initializing...", "success");
         loadState();
         debugLog(
-          `Loaded state: debt=${state.debt}, credit=${state.credit}, lastCheckDate=${state.lastCheckDate}`
+          `Loaded state: debt=${state.debt}, credit=${state.credit}, lastCheckDate=${state.lastCheckDate}`,
         );
         await checkDayRollover();
         updateDisplay();
@@ -1352,7 +1375,7 @@
         setInterval(async () => {
           const today = getDateString();
           debugLog(
-            `⏰ Monitor check: today=${today}, lastCheckDate=${state.lastCheckDate}`
+            `⏰ Monitor check: today=${today}, lastCheckDate=${state.lastCheckDate}`,
           );
           if (state.lastCheckDate && state.lastCheckDate !== today) {
             debugLog("🔔 Day change detected! Applying rollover...", "success");
@@ -1384,7 +1407,7 @@
 
         if (!appKey) {
           alert(
-            'Please enter a cloud key first.\n\nExample: "misha" or "john123"'
+            'Please enter a cloud key first.\n\nExample: "misha" or "john123"',
           );
           return;
         }
@@ -1392,7 +1415,7 @@
         // Validate key (alphanumeric, no spaces)
         if (!/^[a-zA-Z0-9]+$/.test(appKey)) {
           alert(
-            "Cloud key must contain only letters and numbers (no spaces or special characters)."
+            "Cloud key must contain only letters and numbers (no spaces or special characters).",
           );
           return;
         }
@@ -1405,7 +1428,7 @@
         // First, try to PULL from cloud to see if this key already exists
         try {
           const response = await fetch(
-            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${appKey}:fitnessdebt`
+            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${appKey}:fitnessdebt`,
           );
           let cloudData = null;
           if (response.ok) {
@@ -1442,7 +1465,7 @@
                     credit.toFixed(0) +
                     " RMB\nLast rollover: " +
                     lastCheckDate +
-                    "\n\nYour debt will now auto-sync after each transaction."
+                    "\n\nYour debt will now auto-sync after each transaction.",
                 );
                 return;
               }
@@ -1468,7 +1491,7 @@
                     debt.toFixed(0) +
                     " RMB\nLast rollover: " +
                     lastCheckDate +
-                    "\n\nYour debt will now auto-sync after each transaction."
+                    "\n\nYour debt will now auto-sync after each transaction.",
                 );
                 return;
               }
@@ -1484,17 +1507,17 @@
                 appKey +
                 '"\n\nThis is a new key. Your current debt (' +
                 state.debt.toFixed(0) +
-                " RMB) has been synced to cloud.\n\nYour debt will now auto-sync after each transaction."
+                " RMB) has been synced to cloud.\n\nYour debt will now auto-sync after each transaction.",
             );
           } else {
             alert(
-              "Cloud key saved, but sync failed. Check your internet connection."
+              "Cloud key saved, but sync failed. Check your internet connection.",
             );
           }
         } catch (error) {
           console.error("Error checking cloud:", error);
           alert(
-            "Error checking cloud. Key saved locally, but could not verify cloud data."
+            "Error checking cloud. Key saved locally, but could not verify cloud data.",
           );
         }
       }
@@ -1518,7 +1541,7 @@
               method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ value: syncValue }),
-            }
+            },
           );
 
           console.log("Sync response status:", response.status);
@@ -1545,7 +1568,7 @@
 
         try {
           const response = await fetch(
-            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${state.appKey}:fitnessdebt`
+            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${state.appKey}:fitnessdebt`,
           );
           let cloudData = null;
           if (response.ok) {
@@ -1606,7 +1629,7 @@
 
         try {
           const response = await fetch(
-            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${appKey}:fitnessdebt`
+            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${appKey}:fitnessdebt`,
           );
           let cloudData = null;
           if (response.ok) {
@@ -1654,7 +1677,7 @@
                     " RMB\nNew credit: " +
                     credit.toFixed(0) +
                     " RMB\nLast rollover: " +
-                    lastCheckDate
+                    lastCheckDate,
                 );
               } else {
                 alert("Invalid data format in cloud.");
@@ -1689,7 +1712,7 @@
                     " RMB\nNew debt: " +
                     debt.toFixed(0) +
                     " RMB\nLast rollover: " +
-                    lastCheckDate
+                    lastCheckDate,
                 );
               } else {
                 alert("Invalid data format in cloud.");
@@ -1701,7 +1724,7 @@
             alert(
               'No debt data found in cloud for key "' +
                 appKey +
-                '".\n\nThis might be a new key. Your next transaction will sync automatically.'
+                '".\n\nThis might be a new key. Your next transaction will sync automatically.',
             );
           }
         } catch (error) {
@@ -1721,7 +1744,7 @@
 
         try {
           const response = await fetch(
-            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${state.appKey}:fitnessdebt`
+            `https://nightingale-ssd.tail8c7d58.ts.net/compute/kv/${state.appKey}:fitnessdebt`,
           );
           let cloudData = null;
           if (response.ok) {
@@ -1853,7 +1876,7 @@
         const lastDate = state.lastCheckDate;
 
         debugLog(
-          `📅 checkDayRollover: today=${today}, lastCheckDate=${lastDate}`
+          `📅 checkDayRollover: today=${today}, lastCheckDate=${lastDate}`,
         );
 
         // If we have an app key and a day has passed, check cloud first (unless in test mode)
@@ -1867,7 +1890,7 @@
         // Re-check after potential cloud sync
         const currentLastDate = state.lastCheckDate;
         debugLog(
-          `After cloud check: currentLastDate=${currentLastDate}, today=${getDateString()}`
+          `After cloud check: currentLastDate=${currentLastDate}, today=${getDateString()}`,
         );
 
         if (currentLastDate && currentLastDate !== today) {
@@ -1875,7 +1898,7 @@
           const last = new Date(currentLastDate);
           const current = new Date(today);
           const daysPassed = Math.floor(
-            (current - last) / (1000 * 60 * 60 * 24)
+            (current - last) / (1000 * 60 * 60 * 24),
           );
 
           debugLog(`📅 Days passed: ${daysPassed}`, "success");
@@ -1886,7 +1909,7 @@
           const rolloverDetails = [];
 
           debugLog(
-            `Starting rollover: debt=${initialDebt}, credit=${initialCredit}`
+            `Starting rollover: debt=${initialDebt}, credit=${initialCredit}`,
           );
 
           for (let i = 0; i < daysPassed; i++) {
@@ -1895,14 +1918,14 @@
             debugLog(
               `Day ${
                 i + 1
-              }: Before - debt=${beforeDebt}, credit=${beforeCredit}`
+              }: Before - debt=${beforeDebt}, credit=${beforeCredit}`,
             );
             applyDayEnd();
             debugLog(
               `Day ${i + 1}: After - debt=${state.debt}, credit=${
                 state.credit
               }`,
-              "success"
+              "success",
             );
             rolloverDetails.push({
               beforeDebt,
@@ -1922,7 +1945,7 @@
           // Show modal with rollover summary
           debugLog(
             `📊 Showing rollover modal: ${daysPassed} day(s), debt ${initialDebt} → ${state.debt}`,
-            "success"
+            "success",
           );
           showRolloverModal(
             daysPassed,
@@ -1930,7 +1953,7 @@
             initialCredit,
             state.debt,
             state.credit,
-            rolloverDetails
+            rolloverDetails,
           );
         } else if (!currentLastDate || currentLastDate !== today) {
           debugLog("First time setup detected");
@@ -1986,7 +2009,7 @@
 
         // Add system transaction
         let description = `Day end: debt doubled (${oldDebt.toFixed(
-          0
+          0,
         )} × 2 = ${(oldDebt * 2).toFixed(0)}), then +${MGMT_FEE} mgmt fee${creditDescription}`;
 
         state.transactions.unshift({
@@ -2006,7 +2029,7 @@
 
           const desc = document.getElementById("purchaseDesc").value;
           const usd = parseFloat(
-            document.getElementById("purchaseAmount").value
+            document.getElementById("purchaseAmount").value,
           );
 
           let baseCost = usd * USD_TO_RMB;
@@ -2049,7 +2072,7 @@
           let transactionDesc = desc;
           if (usedCredit > 0 && addedDebt > 0) {
             transactionDesc += ` (${usedCredit.toFixed(
-              0
+              0,
             )} RMB from credit, ${addedDebt.toFixed(0)} RMB to debt)`;
           } else if (usedCredit > 0) {
             transactionDesc += " (paid with credit)";
@@ -2085,7 +2108,7 @@
 
           const type = document.getElementById("exerciseType").value;
           const amount = parseFloat(
-            document.getElementById("exerciseAmount").value
+            document.getElementById("exerciseAmount").value,
           );
 
           recordExercise(type, amount);
@@ -2121,7 +2144,7 @@
         recordExercise(type, amount);
 
         // Show toast notification
-        const unit = (type === "plank" || type === "hike") ? "min" : "reps";
+        const unit = type === "plank" || type === "hike" ? "min" : "reps";
         showToast(`✓ Recorded ${amount} ${unit} of ${typeNames[type]}`);
 
         // Re-enable button after 3 seconds and reset styles
@@ -2137,7 +2160,7 @@
       function recordExercise(type, amount) {
         const value = state.exerciseValues[type];
         const rmb = amount * value;
-        const unit = (type === "plank" || type === "hike") ? "min" : "reps";
+        const unit = type === "plank" || type === "hike" ? "min" : "reps";
 
         let description = `${typeNames[type]} (${amount} ${unit})`;
 
@@ -2151,7 +2174,7 @@
             // Add surplus to credit
             state.credit += surplus;
             description += ` (-${payment.toFixed(
-              0
+              0,
             )} RMB debt, +${surplus.toFixed(0)} RMB credit)`;
           } else {
             description += ` (-${payment.toFixed(0)} RMB debt)`;
@@ -2224,8 +2247,8 @@
                     <div class="transaction-item ${t.type}">
                         <div class="transaction-header">
                             <span class="transaction-amount ${amountClass}">${sign}${t.amount.toFixed(
-              0
-            )} RMB</span>
+                              0,
+                            )} RMB</span>
                             <span class="transaction-time">${t.time}</span>
                         </div>
                         <div class="transaction-description">${desc}</div>
@@ -2251,28 +2274,29 @@
           state.exerciseValues.hike || 1;
 
         // Load credit rollover setting
-        document.getElementById("noCreditRollover").checked = state.noCreditRollover || false;
+        document.getElementById("noCreditRollover").checked =
+          state.noCreditRollover || false;
         updateCreditRolloverStatus();
       }
 
       function saveExerciseValues() {
         state.exerciseValues.pushups = parseFloat(
-          document.getElementById("valuePushups").value
+          document.getElementById("valuePushups").value,
         );
         state.exerciseValues.situps = parseFloat(
-          document.getElementById("valueSitups").value
+          document.getElementById("valueSitups").value,
         );
         state.exerciseValues.curls = parseFloat(
-          document.getElementById("valueCurls").value
+          document.getElementById("valueCurls").value,
         );
         state.exerciseValues.bench = parseFloat(
-          document.getElementById("valueBench").value
+          document.getElementById("valueBench").value,
         );
         state.exerciseValues.plank = parseFloat(
-          document.getElementById("valuePlank").value
+          document.getElementById("valuePlank").value,
         );
         state.exerciseValues.hike = parseFloat(
-          document.getElementById("valueHike").value
+          document.getElementById("valueHike").value,
         );
 
         saveState();
@@ -2280,7 +2304,8 @@
       }
 
       function toggleCreditRollover() {
-        state.noCreditRollover = document.getElementById("noCreditRollover").checked;
+        state.noCreditRollover =
+          document.getElementById("noCreditRollover").checked;
         saveState();
         updateCreditRolloverStatus();
         updateCreditLabel();
@@ -2298,7 +2323,9 @@
       }
 
       function updateCreditLabel() {
-        const labelEl = document.querySelector('.balance-item:last-child .balance-unit');
+        const labelEl = document.querySelector(
+          ".balance-item:last-child .balance-unit",
+        );
         if (labelEl) {
           if (state.noCreditRollover) {
             labelEl.textContent = "RMB (Resets Nightly)";
@@ -2347,7 +2374,7 @@
         initialCredit,
         finalDebt,
         finalCredit,
-        details
+        details,
       ) {
         const modal = document.getElementById("rolloverModal");
         const subtitle = document.getElementById("modalSubtitle");
@@ -2375,7 +2402,7 @@
                 <div class="rollover-line">
                   <span class="rollover-label">Starting Debt:</span>
                   <span class="rollover-value">${day.beforeDebt.toFixed(
-                    0
+                    0,
                   )} RMB</span>
                 </div>
                 <div class="rollover-line">
@@ -2389,20 +2416,20 @@
                 <div class="rollover-line">
                   <span class="rollover-label">Ending Debt:</span>
                   <span class="rollover-value">${day.afterDebt.toFixed(
-                    0
+                    0,
                   )} RMB</span>
                 </div>
                 ${
                   day.beforeCredit > 0
-                    ? (state.noCreditRollover
-                        ? `<div class="rollover-line">
+                    ? state.noCreditRollover
+                      ? `<div class="rollover-line">
                   <span class="rollover-label">Credit Forfeited:</span>
                   <span class="rollover-value">-${day.beforeCredit.toFixed(0)} RMB</span>
                 </div>`
-                        : `<div class="rollover-line">
+                      : `<div class="rollover-line">
                   <span class="rollover-label">Credit Rollover:</span>
                   <span class="rollover-value">${day.beforeCredit.toFixed(0)} → ${day.afterCredit.toFixed(0)} RMB (-${MGMT_FEE} fee)</span>
-                </div>`)
+                </div>`
                     : ""
                 }
               </div>
@@ -2417,20 +2444,20 @@
               state.lastCheckDate
             }:</span>
             <span class="rollover-value old">${initialDebt.toFixed(
-              0
+              0,
             )} RMB</span>
           </div>
           ${
             initialCredit > 0
-              ? (state.noCreditRollover
-                  ? `<div class="rollover-line">
+              ? state.noCreditRollover
+                ? `<div class="rollover-line">
             <span class="rollover-label">Credit Forfeited:</span>
             <span class="rollover-value">-${initialCredit.toFixed(0)} RMB</span>
           </div>`
-                  : `<div class="rollover-line">
+                : `<div class="rollover-line">
             <span class="rollover-label">Credit After Fees:</span>
             <span class="rollover-value">${initialCredit.toFixed(0)} → ${finalCredit.toFixed(0)} RMB</span>
-          </div>`)
+          </div>`
               : ""
           }
           <div class="rollover-line total">
@@ -2538,7 +2565,7 @@
       function forceRolloverTest() {
         debugLog("🧪 FORCE ROLLOVER TEST initiated", "success");
         debugLog(
-          `Before: debt=${state.debt}, credit=${state.credit}, lastCheckDate=${state.lastCheckDate}`
+          `Before: debt=${state.debt}, credit=${state.credit}, lastCheckDate=${state.lastCheckDate}`,
         );
 
         // Enable test mode to bypass cloud sync
@@ -2576,7 +2603,7 @@
         updateDebugPanel();
         debugLog(
           '✓ Date set. Now click "Force Rollover" or wait up to 60s',
-          "success"
+          "success",
         );
       }
 
@@ -2584,7 +2611,7 @@
         testMode = !testMode;
         debugLog(
           `🧪 Test mode ${testMode ? "ENABLED" : "DISABLED"}`,
-          testMode ? "success" : "info"
+          testMode ? "success" : "info",
         );
         updateDebugPanel();
       }
